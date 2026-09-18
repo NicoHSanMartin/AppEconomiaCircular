@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EcoCiclo: La Aventura Circular</title>
+<style>
+  :root{
+    --azul:#1CA7EC; --azul2:#0E7FB8; --verde:#3FBF7F; --verde2:#279A5F;
+    --amarillo:#FFC93C; --naranja:#FF8A4C; --violeta:#8E6FE0; --rosa:#FF6F9C;
+    --crema:#FFF7E6; --marron:#7A5230; --oscuro:#1B3B4B;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{margin:0;height:100%;overflow:hidden;font-family:'Trebuchet MS',Verdana,sans-serif;background:var(--azul);}
+  #app{position:relative;width:100%;height:100%;overflow:hidden;}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+  .screen.active{display:flex;}
+  .bg-sky{background:linear-gradient(180deg,#7FD8FF 0%,#B9F0D8 55%,#EAF9C6 100%);}
+  .cloud{position:absolute;background:#fff;border-radius:50px;opacity:.85;filter:drop-shadow(0 4px 0 rgba(0,0,0,.05));}
+  h1{color:var(--oscuro);text-shadow:2px 2px 0 #fff;font-size:2.1em;margin:0 0 6px;text-align:center;}
+  h2{color:var(--oscuro);margin:4px 0;text-align:center;}
+  p.sub{color:var(--oscuro);text-align:center;max-width:560px;margin:4px 0 18px;font-size:1.05em;}
+  .droplet-logo{width:110px;height:130px;margin-bottom:6px;}
+  .btn{
+    background:linear-gradient(180deg,var(--amarillo),#FFB300);
+    border:none;border-radius:20px;padding:16px 30px;font-size:1.2em;font-weight:bold;
+    color:#5A3A00;box-shadow:0 6px 0 #C98A00; cursor:pointer;margin:8px;transition:transform .08s;
+    min-width:180px;
+  }
+  .btn:active{transform:translateY(6px);box-shadow:0 0 0 #C98A00;}
+  .btn.green{background:linear-gradient(180deg,#6EE7A5,var(--verde));box-shadow:0 6px 0 var(--verde2);color:#0B3A22;}
+  .btn.blue{background:linear-gradient(180deg,#7FD4FF,var(--azul));box-shadow:0 6px 0 var(--azul2);color:#04304a;}
+  .btn.pink{background:linear-gradient(180deg,#FFA3C0,var(--rosa));box-shadow:0 6px 0 #C24870;color:#5A0F2A;}
+  .rowbtns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:600px;}
+  .card{
+    background:rgba(255,255,255,.9);border-radius:24px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.15);
+    max-width:640px;width:100%;text-align:center;
+  }
+  #topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;z-index:20;pointer-events:none;}
+  #topbar>*{pointer-events:auto;}
+  .pill{background:rgba(255,255,255,.9);border-radius:20px;padding:6px 14px;font-weight:bold;color:var(--oscuro);
+    display:flex;align-items:center;gap:6px;box-shadow:0 3px 8px rgba(0,0,0,.15);}
+  .iconbtn{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.9);border:none;
+    box-shadow:0 3px 8px rgba(0,0,0,.15);font-size:1.3em;cursor:pointer;}
+  #stage{position:relative;width:100%;height:100%;}
+  .avatar-pick{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:14px 0;}
+  .avatar-opt{width:92px;height:92px;border-radius:50%;border:5px solid transparent;cursor:pointer;
+    background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.15);}
+  .avatar-opt.selected{border-color:var(--amarillo);}
+  .age-card{background:rgba(255,255,255,.95);border-radius:22px;padding:18px 22px;margin:10px;width:220px;
+    cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.15);border:4px solid transparent;text-align:center;}
+  .age-card.selected{border-color:var(--verde);}
+  .age-card svg{width:70px;height:70px;}
+  .map-node{position:absolute;width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 14px rgba(0,0,0,.25);cursor:pointer;border:5px solid #fff;font-size:2em;}
+  .map-node.locked{filter:grayscale(1) brightness(.8);cursor:not-allowed;}
+  .map-node .star{position:absolute;top:-10px;right:-6px;font-size:1.1em;}
+  .path-line{position:absolute;height:6px;background:repeating-linear-gradient(90deg,#fff 0 10px, transparent 10px 18px);
+    border-radius:3px;}
+  #minigame-area{width:100%;height:100%;position:relative;}
+  .dropzone{border:4px dashed #ffffffaa;border-radius:18px;display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.18);}
+  .dropzone.over{background:rgba(255,255,255,.4);border-color:#fff;}
+  .draggable{cursor:grab;touch-action:none;}
+  .toast{position:absolute;left:50%;top:14%;transform:translateX(-50%);background:#fff;padding:12px 22px;
+    border-radius:16px;font-weight:bold;color:var(--oscuro);box-shadow:0 6px 16px rgba(0,0,0,.2);z-index:50;
+    font-size:1.2em;opacity:0;transition:opacity .25s;}
+  .toast.show{opacity:1;}
+  .progressbar{width:80%;max-width:400px;height:16px;background:rgba(255,255,255,.5);border-radius:10px;overflow:hidden;margin:8px auto;}
+  .progressbar>div{height:100%;background:linear-gradient(90deg,var(--verde),var(--amarillo));width:0%;transition:width .3s;}
+  .timerbar{width:200px;height:12px;background:rgba(255,255,255,.5);border-radius:8px;overflow:hidden;}
+  .timerbar>div{height:100%;background:var(--naranja);width:100%;}
+  .quiz-opt{background:#fff;border-radius:16px;padding:14px;margin:6px 0;width:100%;text-align:left;font-size:1.05em;
+    box-shadow:0 4px 10px rgba(0,0,0,.1);cursor:pointer;border:3px solid transparent;display:flex;align-items:center;gap:10px;}
+  .quiz-opt.correct{border-color:var(--verde);background:#E4FCEE;}
+  .quiz-opt.wrong{border-color:#E05A5A;background:#FDE8E8;}
+  .confetti{position:absolute;top:-20px;border-radius:2px;pointer-events:none;}
+  #footer-credit{position:absolute;bottom:6px;right:10px;color:#ffffffaa;font-size:.65em;z-index:5;}
+  ::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar" style="display:none;">
+    <div class="pill">💧 <span id="hud-drops">0</span></div>
+    <div class="pill">⭐ <span id="hud-stars">0</span></div>
+    <button class="iconbtn" id="btn-store">🛍️</button>
+    <button class="iconbtn" id="btn-sound">🔊</button>
+    <button class="iconbtn" id="btn-home">🏠</button>
+  </div>
+  <div id="stage"></div>
+</div>
+
+<script>
+/* ============ AUDIO (sintetizado, sin archivos externos) ============ */
+const AudioX = (()=>{
+  let ctx=null, on=true;
+  function ensure(){ if(!ctx){ ctx = new (window.AudioContext||window.webkitAudioContext)(); } }
+  function beep(freq=440,dur=.12,type='sine',vol=.18,delay=0){
+    if(!on) return; ensure();
+    const t=ctx.currentTime+delay;
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=type; o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vol,t+.015);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t+dur+.02);
+  }
+  return {
+    toggle(){ on=!on; return on; },
+    click(){ beep(520,.06,'triangle',.15); },
+    correct(){ beep(660,.1,'sine',.2); beep(880,.14,'sine',.2,.09); beep(1100,.18,'sine',.2,.18); },
+    wrong(){ beep(180,.22,'sawtooth',.15); },
+    win(){ [523,659,784,1046].forEach((f,i)=>beep(f,.18,'sine',.22,i*.11)); },
+    drop(){ beep(300,.08,'square',.12); },
+    pop(){ beep(700+Math.random()*200,.07,'triangle',.12); },
+    tick(){ beep(1000,.04,'square',.06); },
+    isOn(){ return on; }
+  };
+})();
+
+/* ============ ESTADO GLOBAL ============ */
+const State = {
+  avatar: 0,
+  ageBand: null, // 'a' 6-8, 'b' 8-10, 'c' 10-12
+  drops: 0,
+  stars: {}, // levelId -> stars
+  currentLevel: null,
+};
+function saveState(){ try{ localStorage.setItem('ecociclo_save', JSON.stringify(State)); }catch(e){} }
+function loadState(){ try{ const s = JSON.parse(localStorage.getItem('ecociclo_save')); if(s) Object.assign(State,s);}catch(e){} }
+loadState();
+
+const AVATARS = ['🦫','🦡','🐆','🐊','🐢','🦜'];
+const AVATAR_NAMES = ['Carpincho','Tatú mulita','Yaguareté','Yacaré','Tortuga','Cotorra'];
+const AVATAR_COLORS = ['#7A5230','#C79A5E','#FF8A4C','#3FBF7F','#1CA7EC','#3FBF7F'];
+
+/* Niveles: contenido temático de economía circular / de corrientes (agua, residuos, energía) */
+const LEVELS = [
+  {id:'l1', name:'El Paraná Herido', icon:'💧', theme:'Ciclo del agua y contaminación', color:'var(--azul)'},
+  {id:'l2', name:'Esteros del Iberá', icon:'🗑️', theme:'Separar residuos', color:'var(--marron)'},
+  {id:'l3', name:'Taller en Corrientes', icon:'🔧', theme:'Reutilizar y reparar', color:'var(--naranja)'},
+  {id:'l4', name:'Fábrica Circular Correntina', icon:'🏭', theme:'De residuo a recurso', color:'var(--violeta)'},
+  {id:'l5', name:'Represa de Yacyretá', icon:'⚡', theme:'Energías limpias', color:'var(--amarillo)'},
+  {id:'l6', name:'Consejo de Corrientes', icon:'🌍', theme:'Decisiones finales', color:'var(--verde)'},
+];
+
+function difficultyFor(band){
+  // Escala parámetros de juego según edad, sin decir "difícil/fácil"
+  if(band==='a') return {time:999, items:4, distract:1, lives:5, quizChoices:2, speed:0.7};
+  if(band==='b') return {time:45, items:6, distract:2, lives:3, quizChoices:3, speed:1};
+  return {time:30, items:8, distract:3, lives:2, quizChoices:4, speed:1.35};
+}
+
+/* ============ NAVEGACIÓN DE PANTALLAS ============ */
+const stage = document.getElementById('stage');
+const topbar = document.getElementById('topbar');
+let activeTimer = null;
+function stopActiveTimer(){ if(activeTimer){ activeTimer.stop(); activeTimer=null; } }
+function show(html, opts={}){
+  stopActiveTimer();
+  stage.innerHTML = `<div class="screen active ${opts.sky?'bg-sky':''}" id="scr">${html}</div>`;
+  topbar.style.display = opts.hud ? 'flex':'none';
+  if(opts.hud){ document.getElementById('hud-drops').textContent = State.drops; document.getElementById('hud-stars').textContent = Object.values(State.stars).reduce((a,b)=>a+b,0); }
+}
+document.getElementById('btn-home').onclick = ()=>{ AudioX.click(); renderMap(); };
+document.getElementById('btn-sound').onclick = (e)=>{ const on=AudioX.toggle(); e.target.textContent = on?'🔊':'🔇'; };
+document.getElementById('btn-store').onclick = ()=>{ AudioX.click(); renderStore(); };
+
+/* ============ TIENDA ============ */
+const STORE_ITEMS = [
+  {k:'marco_oro', n:'Marco Dorado', desc:'Un anillo dorado para tu avatar', cost:30, e:'⭕'},
+  {k:'marco_hoja', n:'Corona de Hojas', desc:'Adorno vegetal para tu avatar', cost:20, e:'🍃'},
+  {k:'mascota_pez', n:'Mascota: Dorado', desc:'Un pez dorado del Paraná te acompaña', cost:40, e:'🐟'},
+  {k:'mascota_yacare', n:'Mascota: Yacarecito', desc:'Un pequeño yacaré compañero', cost:50, e:'🐊'},
+  {k:'fondo_iberá', n:'Fondo: Esteros', desc:'Pinta el mapa con los colores del Iberá', cost:35, e:'🌿'},
+  {k:'pista', n:'Pista Extra', desc:'Sumá una pista para tu próximo nivel', cost:15, e:'💡'},
+];
+function renderStore(){
+  if(!State.owned) State.owned = [];
+  const cards = STORE_ITEMS.map(it=>{
+    const owned = State.owned.includes(it.k);
+    return `<div class="card" style="padding:14px;margin:6px;width:150px;">
+      <div style="font-size:2.2em;">${it.e}</div>
+      <div style="font-weight:bold;color:var(--oscuro);font-size:.95em;">${it.n}</div>
+      <div style="font-size:.75em;color:#555;margin:4px 0 8px;">${it.desc}</div>
+      ${owned? `<div style="font-weight:bold;color:var(--verde2);">✔ Tenés esto</div>`
+        : `<button class="btn amarillo" data-k="${it.k}" data-cost="${it.cost}" style="min-width:0;padding:8px 14px;font-size:.9em;">💧${it.cost}</button>`}
+    </div>`;
+  }).join('');
+  show(`
+    <h2>Mercadito de los Esteros 🛍️</h2>
+    <p class="sub" style="margin:0 0 8px;">Canjeá tus gotas 💧 por sorpresas.</p>
+    <div class="pill" style="margin-bottom:10px;">💧 Tenés: ${State.drops}</div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;max-height:60vh;overflow-y:auto;">${cards}</div>
+    <button class="btn blue" id="backmap">Volver al mapa 🗺️</button>
+  `,{sky:true, hud:true});
+  document.getElementById('backmap').onclick=()=>{ AudioX.click(); renderMap(); };
+  document.querySelectorAll('[data-cost]').forEach(b=>{
+    b.onclick=()=>{
+      const cost=+b.dataset.cost, k=b.dataset.k;
+      if(State.drops<cost){ AudioX.wrong(); toast('¡Todavía no tenés suficientes gotas!'); return; }
+      State.drops-=cost; State.owned.push(k); saveState(); AudioX.correct(); confettiBurst(14);
+      renderStore();
+    };
+  });
+}
+
+function toast(msg, ms=1400){
+  const t=document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  stage.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, ms);
+}
+function confettiBurst(n=26){
+  const colors=['#FFC93C','#3FBF7F','#1CA7EC','#FF6F9C','#8E6FE0'];
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left = (10+Math.random()*80)+'%';
+    c.style.width = c.style.height = (6+Math.random()*7)+'px';
+    c.style.background = colors[i%colors.length];
+    c.style.transform = `rotate(${Math.random()*360}deg)`;
+    stage.appendChild(c);
+    const dur = 1200+Math.random()*900;
+    c.animate([
+      {transform:`translateY(0) rotate(0deg)`, opacity:1},
+      {transform:`translateY(${window.innerHeight}px) rotate(${360+Math.random()*360}deg)`, opacity:.9}
+    ],{duration:dur, easing:'ease-in'});
+    setTimeout(()=>c.remove(), dur);
+  }
+}
+
+/* ============ PANTALLA 1: TÍTULO ============ */
+function renderTitle(){
+  show(`
+    <div class="cloud" style="width:140px;height:60px;top:8%;left:6%;"></div>
+    <div class="cloud" style="width:100px;height:44px;top:14%;right:8%;"></div>
+    <svg class="droplet-logo" viewBox="0 0 100 120">
+      <path d="M50 5 C 20 45, 8 65, 8 82 A42 42 0 0 0 92 82 C 92 65, 80 45, 50 5 Z" fill="#1CA7EC" stroke="#0E7FB8" stroke-width="3"/>
+      <path d="M50 5 C 20 45, 8 65, 8 82 A42 42 0 0 0 92 82" fill="none"/>
+      <ellipse cx="35" cy="70" rx="10" ry="14" fill="#7FD4FF" opacity=".7"/>
+      <circle cx="50" cy="82" r="18" fill="#3FBF7F"/>
+      <path d="M42 82 l6 6 l10 -12" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1>EcoCiclo<br><span style="font-size:.55em;">La Aventura Circular</span></h1>
+    <p class="sub">Ayudá a tu comunidad a cerrar el ciclo: nada se tira, todo se transforma. ¡Vamos!</p>
+    <button class="btn green" id="start">▶ Jugar</button>
+  `,{sky:true});
+  document.getElementById('start').onclick = ()=>{ AudioX.click(); renderAvatarPick(); };
+}
+
+/* ============ PANTALLA 2: ELEGIR AVATAR ============ */
+function renderAvatarPick(){
+  const opts = AVATARS.map((a,i)=>`
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="avatar-opt ${i===State.avatar?'selected':''}" data-i="${i}"
+        style="display:flex;align-items:center;justify-content:center;font-size:2.4em;background:${AVATAR_COLORS[i]}22;">${a}</div>
+      <div style="font-size:.8em;font-weight:bold;color:var(--oscuro);margin-top:4px;">${AVATAR_NAMES[i]}</div>
+    </div>
+  `).join('');
+  show(`
+    <h2>Elegí tu guía de los esteros</h2>
+    <p class="sub" style="margin:0 0 10px;">Fauna de Corrientes te va a acompañar en la aventura.</p>
+    <div class="avatar-pick">${opts}</div>
+    <button class="btn blue" id="next">Siguiente ➜</button>
+  `,{sky:true});
+  document.querySelectorAll('.avatar-opt').forEach(el=>{
+    el.onclick=()=>{ AudioX.pop(); State.avatar=+el.dataset.i; document.querySelectorAll('.avatar-opt').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
+  });
+  document.getElementById('next').onclick=()=>{ AudioX.click(); renderAgePick(); };
+}
+
+/* ============ PANTALLA 3: ELEGIR EDAD (define nivel de dificultad internamente) ============ */
+function renderAgePick(){
+  const cards = [
+    {band:'a', label:'6 a 8 años', icon:svgSprout()},
+    {band:'b', label:'8 a 10 años', icon:svgTree()},
+    {band:'c', label:'10 a 12 años', icon:svgForest()},
+  ];
+  show(`
+    <h2>¿Cuántos años tenés?</h2>
+    <p class="sub">Así preparamos tu aventura a tu medida.</p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;">
+      ${cards.map(c=>`<div class="age-card" data-b="${c.band}">${c.icon}<div style="font-weight:bold;color:var(--oscuro);margin-top:6px;">${c.label}</div></div>`).join('')}
+    </div>
+    <button class="btn green" id="go" style="margin-top:10px;">Empezar la aventura 🌍</button>
+  `,{sky:true});
+  document.querySelectorAll('.age-card').forEach(el=>{
+    el.onclick=()=>{ AudioX.pop(); State.ageBand = el.dataset.b; document.querySelectorAll('.age-card').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
+  });
+  document.getElementById('go').onclick=()=>{
+    if(!State.ageBand){ toast('¡Elegí tu edad primero!'); return; }
+    AudioX.click(); saveState(); renderMap();
+  };
+}
+function svgSprout(){return `<svg viewBox="0 0 80 80" width="60" height="60"><rect x="34" y="50" width="12" height="22" rx="4" fill="#7A5230"/><path d="M40 50 C 20 50 15 30 25 20 C 30 35 35 42 40 50 Z" fill="#3FBF7F"/><path d="M40 50 C 60 50 65 30 55 20 C 50 35 45 42 40 50 Z" fill="#6EE7A5"/></svg>`;}
+function svgTree(){return `<svg viewBox="0 0 80 80" width="60" height="60"><rect x="35" y="45" width="10" height="28" rx="3" fill="#7A5230"/><circle cx="40" cy="32" r="24" fill="#3FBF7F"/><circle cx="26" cy="40" r="14" fill="#2E9E68"/><circle cx="54" cy="40" r="14" fill="#2E9E68"/></svg>`;}
+function svgForest(){return `<svg viewBox="0 0 80 80" width="60" height="60"><rect x="12" y="50" width="8" height="22" fill="#7A5230"/><polygon points="16,15 30,50 2,50" fill="#279A5F"/><rect x="58" y="48" width="8" height="24" fill="#7A5230"/><polygon points="62,10 78,52 46,52" fill="#3FBF7F"/><rect x="36" y="55" width="8" height="18" fill="#7A5230"/><polygon points="40,28 52,58 28,58" fill="#6EE7A5"/></svg>`;}
+
+/* ============ PANTALLA 4: MAPA DE NIVELES ============ */
+function unlockedCount(){
+  let n=1;
+  for(let i=0;i<LEVELS.length;i++){ if(State.stars[LEVELS[i].id]>0) n=i+2; }
+  return Math.min(n, LEVELS.length);
+}
+function renderMap(){
+  const unlocked = unlockedCount();
+  const positions = [
+    {x:12,y:70},{x:30,y:48},{x:50,y:66},{x:68,y:40},{x:82,y:60},{x:60,y:18}
+  ];
+  let nodes='';
+  LEVELS.forEach((lv,i)=>{
+    const locked = i>=unlocked;
+    const stars = State.stars[lv.id]||0;
+    nodes += `<div class="map-node ${locked?'locked':''}" style="left:${positions[i].x}%;top:${positions[i].y}%;background:${lv.color};"
+      data-id="${lv.id}">${lv.icon}${stars>0?`<span class="star">${'⭐'.repeat(stars)}</span>`:''}</div>`;
+  });
+  show(`
+    <div class="cloud" style="width:120px;height:50px;top:6%;left:10%;"></div>
+    <div class="cloud" style="width:90px;height:40px;top:10%;right:14%;"></div>
+    <div style="position:absolute;top:16px;left:0;right:0;text-align:center;">
+      <h2 style="margin:0;">Mapa del Planeta Circular</h2>
+    </div>
+    <div style="position:relative;width:100%;height:100%;">${nodes}</div>
+  `,{sky:true, hud:true});
+  document.querySelectorAll('.map-node').forEach(el=>{
+    el.onclick=()=>{
+      if(el.classList.contains('locked')){ AudioX.wrong(); toast('Completá el nivel anterior 🔒'); return; }
+      AudioX.click(); startLevel(el.dataset.id);
+    };
+  });
+}
+
+/* ============ INICIO DE NIVEL: INTRO + MINIJUEGO ============ */
+const LEVEL_INTROS = {
+  l1: "El río Paraná está sufriendo y el dorado y el yacaré no pueden vivir tranquilos. ¡Separá lo que lo contamina de lo que no!",
+  l2: "En los Esteros del Iberá la basura se acumula entre camalotes y carpinchos. Ayudá a separar los residuos en su lugar correcto.",
+  l3: "En un taller de un pueblo correntino, muchos objetos rotos esperan una segunda vida. ¡Encontrá su nuevo uso!",
+  l4: "Una fábrica correntina convierte lo que unos descartan en el recurso de otros. ¡Armá el ciclo correcto!",
+  l5: "Cerca de la represa de Yacyretá, la región necesita energía limpia. Elegí las mejores fuentes para no agotar el planeta.",
+  l6: "El Consejo de Corrientes te pide tomar decisiones importantes para el futuro de su gente, sus ríos y sus esteros."
+};
+function startLevel(id){
+  State.currentLevel = id;
+  const lv = LEVELS.find(l=>l.id===id);
+  show(`
+    <div class="card">
+      <div style="font-size:3em;">${lv.icon}</div>
+      <h2>${lv.name}</h2>
+      <p class="sub">${LEVEL_INTROS[id]}</p>
+      <button class="btn green" id="playbtn">¡A jugar! 🚀</button>
+    </div>
+  `,{sky:true, hud:true});
+  document.getElementById('playbtn').onclick=()=>{ AudioX.click(); runMinigame(id); };
+}
+
+function finishLevel(id, success, starsEarned){
+  if(success){
+    State.stars[id] = Math.max(State.stars[id]||0, starsEarned);
+    State.drops += starsEarned*10;
+    saveState();
+    AudioX.win(); confettiBurst();
+    show(`
+      <div class="card">
+        <div style="font-size:3em;">${'⭐'.repeat(starsEarned)}${'☆'.repeat(3-starsEarned)}</div>
+        <h2>¡Muy bien hecho!</h2>
+        <p class="sub">Ganaste ${starsEarned*10} gotas 💧 por tu esfuerzo circular.</p>
+        <div class="rowbtns">
+          <button class="btn blue" id="tomap">Mapa 🗺️</button>
+          <button class="btn green" id="retry">Repetir 🔁</button>
+        </div>
+      </div>
+    `,{sky:true, hud:true});
+  } else {
+    AudioX.wrong();
+    show(`
+      <div class="card">
+        <div style="font-size:3em;">🌱</div>
+        <h2>¡Casi lo lográs!</h2>
+        <p class="sub">El planeta necesita un poco más de tu ayuda. ¿Lo intentamos otra vez?</p>
+        <div class="rowbtns">
+          <button class="btn blue" id="tomap">Mapa 🗺️</button>
+          <button class="btn green" id="retry">Intentar de nuevo 🔁</button>
+        </div>
+      </div>
+    `,{sky:true, hud:true});
+  }
+  document.getElementById('tomap').onclick=()=>{ AudioX.click(); renderMap(); };
+  document.getElementById('retry').onclick=()=>{ AudioX.click(); startLevel(id); };
+}
+
+/* ============ MOTOR DE MINIJUEGOS ============ */
+function runMinigame(id){
+  const diff = difficultyFor(State.ageBand);
+  if(id==='l1') gameSortRiver(diff, id);
+  else if(id==='l2') gameSortTrash(diff, id);
+  else if(id==='l3') gameMatchRepair(diff, id);
+  else if(id==='l4') gameCycleChain(diff, id);
+  else if(id==='l5') gameEnergyPick(diff, id);
+  else gameFinalQuiz(diff, id);
+}
+
+/* ---- Utilidad: temporizador visual ---- */
+function attachTimer(container, seconds, onEnd){
+  if(seconds>900) return {stop(){}, el:null}; // sin límite (modo 6-8)
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:absolute;top:70px;left:50%;transform:translateX(-50%);z-index:10;';
+  wrap.innerHTML = `<div class="timerbar"><div id="tfill"></div></div>`;
+  container.appendChild(wrap);
+  let t=seconds, total=seconds;
+  const fill = wrap.querySelector('#tfill');
+  const iv = setInterval(()=>{
+    t-=0.1;
+    fill.style.width = Math.max(0,(t/total*100))+'%';
+    if(t<=3 && t>0) AudioX.tick();
+    if(t<=0){ clearInterval(iv); onEnd(); }
+  },100);
+  const handle = { stop(){ clearInterval(iv); } };
+  activeTimer = handle;
+  return handle;
+}
+
+/* ---- MINIJUEGO 1: Río — arrastrar objetos a "Contamina" o "Río limpio" ---- */
+function gameSortRiver(diff, id){
+  const pool = [
+    {n:'Botella plástica',e:'🧴',bad:true},{n:'Aceite usado',e:'🛢️',bad:true},{n:'Pila',e:'🔋',bad:true},
+    {n:'Hoja de árbol',e:'🍃',bad:false},{n:'Pez',e:'🐟',bad:false},{n:'Piedra',e:'🪨',bad:false},
+    {n:'Bolsa',e:'🛍️',bad:true},{n:'Jabón en exceso',e:'🧼',bad:true},{n:'Flor',e:'🌸',bad:false},
+    {n:'Colilla de cigarro',e:'🚬',bad:true}
+  ];
+  const items = shuffle(pool).slice(0, diff.items);
+  let idx=0, correct=0, lives=diff.lives;
+  const html = `
+    <div id="minigame-area">
+      <div style="text-align:center;padding-top:8px;"><h2>Salvá al Paraná 💧</h2></div>
+      <div style="display:flex;justify-content:space-around;margin-top:10px;padding:0 6%;">
+        <div class="dropzone" id="zone-bad" style="width:44%;height:170px;">🚯<br>Contamina</div>
+        <div class="dropzone" id="zone-good" style="width:44%;height:170px;">🐊<br>Río sano</div>
+      </div>
+      <div id="itemhost" style="display:flex;justify-content:center;margin-top:24px;"></div>
+      <div style="text-align:center;margin-top:10px;color:#04304a;font-weight:bold;">Vidas: <span id="lives">${'💙'.repeat(lives)}</span></div>
+    </div>`;
+  show(html,{sky:true, hud:true});
+  const area = document.getElementById('scr');
+  attachTimer(area, diff.time, ()=> finishLevel(id, correct>=Math.ceil(items.length*0.6), starsFrom(correct,items.length)));
+  nextItem();
+  function nextItem(){
+    if(idx>=items.length){ finishLevel(id, correct>=Math.ceil(items.length*0.6), starsFrom(correct,items.length)); return; }
+    const it = items[idx];
+    document.getElementById('itemhost').innerHTML = `<div class="draggable" id="curitem" style="font-size:3.4em;background:#fff;border-radius:20px;padding:14px 22px;box-shadow:0 6px 14px rgba(0,0,0,.2);">${it.e}<div style="font-size:.28em;font-weight:bold;color:#333;">${it.n}</div></div>`;
+    makeDraggable(document.getElementById('curitem'), (zoneId)=>{
+      const chose = zoneId==='zone-bad';
+      if(chose===it.bad){ correct++; AudioX.correct(); }
+      else { lives--; AudioX.wrong(); document.getElementById('lives').textContent='💙'.repeat(Math.max(lives,0)); if(lives<=0){ finishLevel(id,false,0); return; } }
+      idx++; nextItem();
+    }, ['zone-bad','zone-good']);
+  }
+}
+
+/* ---- MINIJUEGO 2: Separar residuos en contenedores (papel/plástico/vidrio/orgánico) ---- */
+function gameSortTrash(diff, id){
+  const cats = [
+    {k:'papel', label:'Papel', color:'#4C8CFF', e:'📦'},
+    {k:'plastico', label:'Plástico', color:'#FFC93C', e:'🧴'},
+    {k:'vidrio', label:'Vidrio', color:'#3FBF7F', e:'🍾'},
+    {k:'organico', label:'Orgánico', color:'#7A5230', e:'🍂'},
+  ];
+  const usedCats = diff.items<=4 ? cats.slice(0,3) : cats;
+  const items = [
+    {n:'Diario',e:'📰',k:'papel'},{n:'Botella',e:'🍾',k:'vidrio'},{n:'Cáscara de banana',e:'🍌',k:'organico'},
+    {n:'Envase',e:'🧴',k:'plastico'},{n:'Caja',e:'📦',k:'papel'},{n:'Frasco',e:'🫙',k:'vidrio'},
+    {n:'Cáscara de huevo',e:'🥚',k:'organico'},{n:'Bolsa',e:'🛍️',k:'plastico'},
+  ].filter(i=>usedCats.some(c=>c.k===i.k));
+  const chosen = shuffle(items).slice(0, diff.items);
+  let idx=0, correct=0, lives=diff.lives;
+  show(`
+    <div id="minigame-area">
+      <div style="text-align:center;padding-top:8px;"><h2>Limpiemos el Iberá 🌿</h2><p class="sub" style="margin:0;">Tocá el contenedor correcto para cada residuo.</p></div>
+      <div id="itemhost" style="display:flex;justify-content:center;margin-top:20px;"></div>
+      <div id="btnhost" style="display:flex;justify-content:center;gap:2%;margin-top:26px;padding:0 4%;flex-wrap:wrap;"></div>
+      <div style="text-align:center;margin-top:14px;color:#04304a;font-weight:bold;">Vidas: <span id="lives">${'💙'.repeat(lives)}</span></div>
+    </div>`,{sky:true, hud:true});
+  const area = document.getElementById('scr');
+  attachTimer(area, diff.time, ()=> finishLevel(id, correct>=Math.ceil(chosen.length*0.6), starsFrom(correct,chosen.length)));
+  nextItem();
+  function nextItem(){
+    if(idx>=chosen.length){ finishLevel(id, correct>=Math.ceil(chosen.length*0.6), starsFrom(correct,chosen.length)); return; }
+    const it = chosen[idx];
+    document.getElementById('itemhost').innerHTML = `<div style="font-size:3.4em;background:#fff;border-radius:20px;padding:14px 22px;box-shadow:0 6px 14px rgba(0,0,0,.2);text-align:center;">${it.e}<div style="font-size:.28em;font-weight:bold;color:#333;">${it.n}</div></div>`;
+    document.getElementById('btnhost').innerHTML = shuffle(usedCats).map(c=>`<button class="binbtn" data-k="${c.k}" style="width:${90/usedCats.length}%;min-width:70px;background:${c.color}33;border:3px solid ${c.color};border-radius:16px;padding:10px 4px;font-weight:bold;color:#222;font-size:.9em;">${c.e}<br>${c.label}</button>`).join('');
+    document.querySelectorAll('.binbtn').forEach(b=>{
+      b.onclick=()=>{
+        AudioX.drop();
+        if(b.dataset.k===it.k){ correct++; AudioX.correct(); }
+        else { lives--; AudioX.wrong(); document.getElementById('lives').textContent='💙'.repeat(Math.max(lives,0)); if(lives<=0){ finishLevel(id,false,0); return; } }
+        idx++; nextItem();
+      };
+    });
+  }
+}
+
+/* ---- MINIJUEGO 3: Emparejar objeto roto con su nuevo uso (memoria/match) ---- */
+function gameMatchRepair(diff, id){
+  const pairsAll = [
+    {a:'👖 Jean roto', b:'👜 Bolso', k:1},
+    {a:'🥫 Lata', b:'🖊️ Portalápices', k:2},
+    {a:'🛞 Neumático', b:'🌸 Maceta', k:3},
+    {a:'🍾 Botella', b:'💡 Lámpara', k:4},
+    {a:'📦 Caja', b:'🏠 Casa de juguete', k:5},
+    {a:'👕 Remera vieja', b:'🧵 Trapo de piso', k:6},
+  ];
+  const nPairs = diff.items<=4?3:(diff.items<=6?4:5);
+  const chosen = shuffle(pairsAll).slice(0,nPairs);
+  let cards = [];
+  chosen.forEach(p=>{ cards.push({txt:p.a,k:p.k}); cards.push({txt:p.b,k:p.k}); });
+  cards = shuffle(cards);
+  let flipped = [], matched = 0, moves=0;
+  const grid = cards.map((c,i)=>`
+    <div class="matchcard" data-i="${i}" data-k="${c.k}" style="width:${diff.items<=4?'42%':'30%'};aspect-ratio:1/0.7;background:linear-gradient(180deg,#8E6FE0,#6C4FC9);
+      border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:1em;
+      box-shadow:0 5px 10px rgba(0,0,0,.2);cursor:pointer;text-align:center;padding:6px;">?</div>
+  `).join('');
+  show(`
+    <div id="minigame-area" style="overflow-y:auto;">
+      <div style="text-align:center;padding-top:8px;"><h2>Segunda vida ♻️</h2><p class="sub" style="margin:0 0 8px;">Encontrá cada par: objeto y su nuevo uso.</p></div>
+      <div id="grid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:0 6% 20px;">${grid}</div>
+    </div>`,{sky:true, hud:true});
+  const area = document.getElementById('scr');
+  attachTimer(area, diff.time+nPairs*4, ()=> finishLevel(id, matched>=Math.ceil(nPairs*0.6), starsFrom(matched,nPairs)));
+  document.querySelectorAll('.matchcard').forEach(el=>{
+    el.onclick=()=>{
+      if(el.dataset.flip || flipped.length>=2) return;
+      AudioX.pop();
+      el.dataset.flip='1';
+      el.textContent = cards[+el.dataset.i].txt;
+      el.style.background='linear-gradient(180deg,#FFC93C,#FFB300)'; el.style.color='#5A3A00';
+      flipped.push(el);
+      if(flipped.length===2){
+        moves++;
+        setTimeout(()=>{
+          if(flipped[0].dataset.k===flipped[1].dataset.k){
+            AudioX.correct(); matched++;
+            flipped.forEach(f=>{ f.style.background='linear-gradient(180deg,#6EE7A5,#3FBF7F)'; f.style.color='#0B3A22'; });
+            flipped=[];
+            if(matched>=nPairs) finishLevel(id, true, starsFrom(nPairs - Math.max(0,moves-nPairs), nPairs, true));
+          } else {
+            AudioX.wrong();
+            flipped.forEach(f=>{ f.dataset.flip=''; f.textContent='?'; f.style.background='linear-gradient(180deg,#8E6FE0,#6C4FC9)'; f.style.color='#fff'; });
+            flipped=[];
+          }
+        },550);
+      }
+    };
+  });
+}
+
+/* ---- MINIJUEGO 4: Armar la cadena circular (ordenar pasos) ---- */
+function gameCycleChain(diff, id){
+  const chains = [
+    ['🍌 Fruta','🍽️ Consumo','🍂 Cáscara','🪱 Compost','🌱 Abono para nueva planta'],
+    ['🌳 Árbol','📄 Papel','🗞️ Uso','♻️ Reciclado','📦 Nueva caja'],
+    ['🛢️ Petróleo','🧴 Plástico','🚰 Botella usada','♻️ Reciclaje','👕 Ropa reciclada'],
+  ];
+  const steps = shuffle(chains)[0].slice(0, Math.min(chains[0].length, 3+ (diff.items>6?2:diff.items>4?1:0)));
+  const shuffled = shuffle(steps.map((s,i)=>({s,i})));
+  let order = [];
+  show(`
+    <div id="minigame-area">
+      <div style="text-align:center;padding-top:8px;"><h2>Armá el ciclo 🔄</h2><p class="sub" style="margin:0;">Tocá los pasos en el orden correcto.</p></div>
+      <div id="chain" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;padding:0 6%;"></div>
+      <div id="pool" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:26px;padding:0 6%;"></div>
+    </div>`,{sky:true, hud:true});
+  const area = document.getElementById('scr');
+  let mistakes=0;
+  attachTimer(area, diff.time, ()=> finishLevel(id, order.length>=steps.length && mistakes<3, starsFrom(steps.length-mistakes, steps.length)));
+  renderChainUI();
+  function renderChainUI(){
+    document.getElementById('chain').innerHTML = steps.map((s,i)=>`<div style="width:60px;height:60px;border-radius:14px;background:${order[i]!==undefined?'#3FBF7F':'#ffffff55'};display:flex;align-items:center;justify-content:center;font-size:1.6em;border:3px solid #fff;">${order[i]!==undefined?steps[i].split(' ')[0]:i+1}</div>`).join('');
+    document.getElementById('pool').innerHTML = shuffled.map(o=>`<div class="poolcard" data-i="${o.i}" style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 4px 10px rgba(0,0,0,.15);font-weight:bold;cursor:pointer;${order.includes(o.i)?'opacity:.25;pointer-events:none;':''}">${o.s}</div>`).join('');
+    document.querySelectorAll('.poolcard').forEach(el=>{
+      el.onclick=()=>{
+        const i=+el.dataset.i;
+        if(i===order.length){ order.push(i); AudioX.correct(); }
+        else { mistakes++; AudioX.wrong(); toast('¡Ese no va ahí todavía!',900); }
+        renderChainUI();
+        if(order.length===steps.length){ setTimeout(()=>finishLevel(id, mistakes<3, starsFrom(steps.length-mistakes, steps.length)),500); }
+      };
+    });
+  }
+}
+
+/* ---- MINIJUEGO 5: Elegir fuentes de energía limpia (multi-selección con feedback) ---- */
+function gameEnergyPick(diff, id){
+  const options = [
+    {n:'Sol (paneles solares)',e:'☀️',clean:true},{n:'Viento (molinos)',e:'🌬️',clean:true},
+    {n:'Carbón',e:'⚫',clean:false},{n:'Agua (represas)',e:'🌊',clean:true},
+    {n:'Petróleo',e:'🛢️',clean:false},{n:'Geotermia',e:'🌋',clean:true},
+    {n:'Gas',e:'🔥',clean:false},
+  ];
+  const chosen = shuffle(options).slice(0, diff.items>6?7:diff.items>4?6:4);
+  let picked = new Set(), locked=false;
+  show(`
+    <div id="minigame-area" style="overflow-y:auto;">
+      <div style="text-align:center;padding-top:8px;"><h2>Energía para la Isla ⚡</h2><p class="sub" style="margin:0;">Elegí las fuentes que no agotan el planeta.</p></div>
+      <div id="grid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px;padding:0 6% 10px;"></div>
+      <div style="text-align:center;"><button class="btn green" id="confirm">Confirmar ⚡</button></div>
+    </div>`,{sky:true, hud:true});
+  document.getElementById('grid').innerHTML = chosen.map((o,i)=>`
+    <div class="energyopt" data-i="${i}" style="width:42%;background:#fff;border-radius:16px;padding:14px;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,.15);border:3px solid transparent;cursor:pointer;">
+      <div style="font-size:2em;">${o.e}</div><div style="font-weight:bold;font-size:.85em;color:#333;">${o.n}</div>
+    </div>`).join('');
+  document.querySelectorAll('.energyopt').forEach(el=>{
+    el.onclick=()=>{
+      if(locked) return;
+      AudioX.pop();
+      const i=+el.dataset.i;
+      if(picked.has(i)){ picked.delete(i); el.style.borderColor='transparent'; }
+      else { picked.add(i); el.style.borderColor='var(--amarillo)'; }
+    };
+  });
+  document.getElementById('confirm').onclick=()=>{
+    if(locked) return; locked=true; AudioX.click();
+    let correct=0, wrong=0;
+    document.querySelectorAll('.energyopt').forEach(el=>{
+      const i=+el.dataset.i; const o=chosen[i];
+      const isPicked = picked.has(i);
+      if(o.clean && isPicked){ correct++; el.style.borderColor='var(--verde)'; el.style.background='#E4FCEE'; }
+      else if(!o.clean && !isPicked){ correct++; }
+      else { wrong++; el.style.borderColor='#E05A5A'; el.style.background='#FDE8E8'; }
+    });
+    AudioX[wrong===0?'win':'wrong']();
+    setTimeout(()=>finishLevel(id, correct>=Math.ceil(chosen.length*0.7), starsFrom(correct,chosen.length)),1100);
+  };
+}
+
+/* ---- MINIJUEGO 6 (final): Quiz de decisiones del Consejo del Planeta ---- */
+function gameFinalQuiz(diff, id){
+  const bank = [
+    {q:'Un vecino tira aceite de cocina por la pileta. ¿Qué le decís?',
+     opts:['Que está bien, se diluye','Que lo junte en una botella y lo lleve a un punto de reciclaje','Que use más jabón para disimular','Nada, no es importante'], correct:1},
+    {q:'¿Qué significa "economía circular"?',
+     opts:['Comprar y tirar rápido','Reutilizar y transformar los recursos en vez de desecharlos','Solo reciclar plástico','Usar más energía cada año'], correct:1},
+    {q:'Una fábrica genera restos de tela. ¿Qué es más circular?',
+     opts:['Quemarlos','Enterrarlos','Usarlos para hacer rellenos de almohadones','Tirarlos al río'], correct:2},
+    {q:'¿Cuál ayuda más a un río limpio?',
+     opts:['Tirar pilas usadas','Plantar árboles cerca de la orilla','Verter pintura sobre él','Dejar bolsas flotando'], correct:1},
+    {q:'Si algo se rompe, ¿qué hacemos en la economía circular antes que tirarlo?',
+     opts:['Tirarlo directo','Ver si se puede reparar o reusar','Comprar 3 nuevos','Quemarlo'], correct:1},
+    {q:'¿Qué fuente de energía se "agota" con el tiempo?',
+     opts:['Solar','Eólica','Petróleo','Geotérmica'], correct:2},
+  ];
+  const n = diff.items<=4?4:(diff.items<=6?5:6);
+  const questions = shuffle(bank).slice(0,n);
+  let idx=0, correct=0;
+  nextQ();
+  function nextQ(){
+    if(idx>=questions.length){ finishLevel(id, correct>=Math.ceil(n*0.6), starsFrom(correct,n)); return; }
+    const q = questions[idx];
+    const optsIdx = shuffle(q.opts.map((o,i)=>({o,i})));
+    show(`
+      <div class="card" style="max-width:520px;">
+        <div class="progressbar"><div style="width:${(idx/questions.length*100)}%;"></div></div>
+        <h2>${q.q}</h2>
+        <div id="opts" style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
+          ${optsIdx.map(o=>`<div class="quiz-opt" data-correct="${o.i===q.correct}">${o.o}</div>`).join('')}
+        </div>
+      </div>`,{sky:true, hud:true});
+    document.querySelectorAll('.quiz-opt').forEach(el=>{
+      el.onclick=()=>{
+        if(el.dataset.locked) return;
+        document.querySelectorAll('.quiz-opt').forEach(o=>o.dataset.locked='1');
+        const ok = el.dataset.correct==='true';
+        el.classList.add(ok?'correct':'wrong');
+        if(ok){ correct++; AudioX.correct(); } else {
+          AudioX.wrong();
+          document.querySelectorAll('.quiz-opt').forEach(o=>{ if(o.dataset.correct==='true') o.classList.add('correct'); });
+        }
+        setTimeout(()=>{ idx++; nextQ(); }, 1000);
+      };
+    });
+  }
+}
+
+/* ============ helpers ============ */
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function starsFrom(correct,total,forceHigh){
+  const ratio = total? correct/total : 0;
+  if(forceHigh || ratio>=0.9) return 3;
+  if(ratio>=0.65) return 2;
+  if(ratio>=0.4) return 1;
+  return 1;
+}
+function makeDraggable(el, onDrop, zoneIds){
+  let dragging=false, ox=0, oy=0, startX=0, startY=0;
+  el.style.position='relative';
+  function point(e){ return e.touches? e.touches[0] : e; }
+  function down(e){
+    dragging=true; const p=point(e);
+    const r=el.getBoundingClientRect(); startX=r.left; startY=r.top; ox=p.clientX; oy=p.clientY;
+    el.style.zIndex=100; e.preventDefault();
+  }
+  function move(e){
+    if(!dragging) return; const p=point(e);
+    const dx=p.clientX-ox, dy=p.clientY-oy;
+    el.style.position='fixed'; el.style.left=(startX+dx)+'px'; el.style.top=(startY+dy)+'px';
+    e.preventDefault();
+  }
+  function up(e){
+    if(!dragging) return; dragging=false;
+    const p = e.changedTouches? e.changedTouches[0] : e;
+    let landed=null;
+    for(const zid of zoneIds){
+      const z=document.getElementById(zid); if(!z) continue;
+      const r=z.getBoundingClientRect();
+      if(p.clientX>=r.left && p.clientX<=r.right && p.clientY>=r.top && p.clientY<=r.bottom){ landed=zid; z.classList.add('over'); setTimeout(()=>z.classList.remove('over'),300); }
+    }
+    if(landed){ AudioX.drop(); onDrop(landed); }
+    else { el.style.position='relative'; el.style.left=0; el.style.top=0; }
+  }
+  el.addEventListener('mousedown',down); window.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+  el.addEventListener('touchstart',down,{passive:false}); window.addEventListener('touchmove',move,{passive:false}); window.addEventListener('touchend',up);
+}
+
+/* ============ INICIO ============ */
+renderTitle();
+</script>
+</body>
+</html>
