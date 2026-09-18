@@ -2,962 +2,1449 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EcoCiclo — La Aventura Circular | Corrientes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>EcoCiclo Corrientes — La Ruta Circular</title>
+<meta name="description" content="Juego educativo de economía circular ambientado en la provincia de Corrientes. 8 misiones, modo aula y certificado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --azul:#1CA7EC; --azul2:#0E7FB8; --verde:#3FBF7F; --verde2:#279A5F;
-    --amarillo:#FFC93C; --naranja:#FF8A4C; --violeta:#8E6FE0; --rosa:#FF6F9C;
-    --crema:#FFF7E6; --marron:#7A5230; --oscuro:#123146;
-    --topbar-h:64px;
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
-  html,body{margin:0;height:100%;overflow:hidden;font-family:'Trebuchet MS',Verdana,sans-serif;background:#0d3b46;}
-  #app{position:relative;width:100%;height:100%;overflow:hidden;}
-  .screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;
-    padding-top:20px; overflow:hidden;}
-  .screen.active{display:flex;}
-  .screen.hud{padding-top:calc(var(--topbar-h) + 16px);}
-  .screen.full{padding:0;}
-  .bg-sky{
-    position:relative;
-    background:
-      radial-gradient(ellipse 55% 30% at 18% 10%, rgba(255,244,200,.45), transparent 60%),
-      linear-gradient(180deg,#5FC2E8 0%,#57C6C2 32%,#3FAE8C 58%,#2C8F63 100%);
-  }
-  .bg-sky::before{
-    content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
-    background:
-      radial-gradient(ellipse 90% 22% at 20% 62%, rgba(255,255,255,.16), transparent 70%),
-      radial-gradient(ellipse 70% 26% at 78% 78%, rgba(19,74,52,.55), transparent 72%),
-      radial-gradient(ellipse 60% 20% at 30% 90%, rgba(15,60,42,.55), transparent 70%),
-      radial-gradient(ellipse 120% 40% at 50% 108%, rgba(10,45,32,.65), transparent 75%);
-    filter:blur(2px);
-  }
-  .bg-sky::after{
-    content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
-    box-shadow:inset 0 0 120px rgba(0,20,15,.35);
-  }
-  .bg-sky.theme-ibera{
-    background:
-      radial-gradient(ellipse 55% 30% at 18% 10%, rgba(255,244,200,.4), transparent 60%),
-      linear-gradient(180deg,#7FD9C4 0%,#5FC49A 35%,#3D9E6C 65%,#2B7A4E 100%);
-  }
-  .bg-sky>*{position:relative;z-index:1;}
-  h1{color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.18);font-size:2.1em;margin:0 0 6px;text-align:center;letter-spacing:.5px;}
-  h2{color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.18);margin:4px 0;text-align:center;}
-  p.sub{color:#EFFFFA;text-shadow:0 1px 0 rgba(0,0,0,.15);text-align:center;max-width:560px;margin:4px 0 18px;font-size:1.05em;}
-  .droplet-logo{width:110px;height:130px;margin-bottom:6px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25));}
-  .btn{
-    background:linear-gradient(180deg,var(--amarillo),#FFB300);
-    border:none;border-radius:20px;padding:16px 30px;font-size:1.2em;font-weight:bold;
-    color:#5A3A00;box-shadow:0 6px 0 #C98A00; cursor:pointer;margin:8px;transition:transform .08s;
-    min-width:180px;
-  }
-  .btn:active{transform:translateY(6px);box-shadow:0 0 0 #C98A00;}
-  .btn.green{background:linear-gradient(180deg,#6EE7A5,var(--verde));box-shadow:0 6px 0 var(--verde2);color:#0B3A22;}
-  .btn.blue{background:linear-gradient(180deg,#7FD4FF,var(--azul));box-shadow:0 6px 0 var(--azul2);color:#04304a;}
-  .btn.pink{background:linear-gradient(180deg,#FFA3C0,var(--rosa));box-shadow:0 6px 0 #C24870;color:#5A0F2A;}
-  .rowbtns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:600px;}
-  .card{
-    background:rgba(255,255,255,.96);border-radius:24px;padding:22px;box-shadow:0 12px 30px rgba(0,0,0,.28);
-    max-width:640px;width:100%;text-align:center;
-  }
-  .card h2, .card p.sub{color:var(--oscuro);text-shadow:none;}
-  #topbar{position:absolute;top:0;left:0;right:0;height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;
-    padding:8px 12px;z-index:20;pointer-events:none;
-    background:linear-gradient(180deg,rgba(6,40,50,.55),rgba(6,40,50,0));}
-  #topbar>*{pointer-events:auto;}
-  .pill{background:rgba(255,255,255,.94);border-radius:20px;padding:6px 12px;font-weight:bold;color:var(--oscuro);
-    display:flex;align-items:center;gap:5px;box-shadow:0 3px 8px rgba(0,0,0,.2);font-size:.95em;}
-  .iconbtn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.94);border:none;
-    box-shadow:0 3px 8px rgba(0,0,0,.2);font-size:1.2em;cursor:pointer;flex-shrink:0;}
-  #stage{position:relative;width:100%;height:100%;}
-  .avatar-pick{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:10px 0;}
-  .avatar-opt{width:96px;height:96px;border-radius:50%;border:5px solid transparent;cursor:pointer;
-    background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;overflow:hidden;}
-  .avatar-opt svg{width:70%;height:70%;}
-  .avatar-opt.selected{border-color:var(--amarillo);box-shadow:0 0 0 4px rgba(255,201,60,.4), 0 4px 10px rgba(0,0,0,.25);}
-  .age-card{background:rgba(255,255,255,.96);border-radius:22px;padding:18px 22px;margin:10px;width:210px;
-    cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.22);border:4px solid transparent;text-align:center;}
-  .age-card.selected{border-color:var(--verde);}
-  .age-card svg{width:70px;height:70px;}
-  #mapscroll{position:absolute;inset:0;top:var(--topbar-h);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
-  #mapcanvas{position:relative;width:100%;}
-  .map-node{position:absolute;width:82px;height:82px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    box-shadow:0 6px 16px rgba(0,0,0,.35);cursor:pointer;border:5px solid #fff;overflow:hidden;background:#fff;}
-  .map-node svg{width:58%;height:58%;}
-  .map-node .badge{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);background:#fff;border-radius:10px;
-    padding:1px 7px;font-size:.62em;font-weight:bold;color:var(--oscuro);box-shadow:0 2px 5px rgba(0,0,0,.2);white-space:nowrap;}
-  .map-node.locked{filter:grayscale(1) brightness(.75);cursor:not-allowed;}
-  .map-node .star{position:absolute;top:-11px;right:-8px;font-size:1em;text-shadow:0 1px 2px rgba(0,0,0,.4);}
-  #minigame-area{width:100%;height:100%;position:relative;overflow-y:auto;}
-  .dropzone{border:4px dashed #ffffffcc;border-radius:18px;display:flex;align-items:center;justify-content:center;
-    background:rgba(255,255,255,.16);flex-direction:column;color:#fff;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,.2);}
-  .dropzone.over{background:rgba(255,255,255,.4);border-color:#fff;}
-  .draggable{cursor:grab;touch-action:none;}
-  .toast{position:absolute;left:50%;top:14%;transform:translateX(-50%);background:#fff;padding:12px 22px;
-    border-radius:16px;font-weight:bold;color:var(--oscuro);box-shadow:0 6px 16px rgba(0,0,0,.3);z-index:50;
-    font-size:1.2em;opacity:0;transition:opacity .25s;}
-  .toast.show{opacity:1;}
-  .progressbar{width:80%;max-width:400px;height:16px;background:rgba(255,255,255,.5);border-radius:10px;overflow:hidden;margin:8px auto;}
-  .progressbar>div{height:100%;background:linear-gradient(90deg,var(--verde),var(--amarillo));width:0%;transition:width .3s;}
-  .timerbar{width:200px;height:12px;background:rgba(255,255,255,.5);border-radius:8px;overflow:hidden;}
-  .timerbar>div{height:100%;background:var(--naranja);width:100%;}
-  .quiz-opt{background:#fff;border-radius:16px;padding:14px;margin:6px 0;width:100%;text-align:left;font-size:1.05em;
-    box-shadow:0 4px 10px rgba(0,0,0,.1);cursor:pointer;border:3px solid transparent;display:flex;align-items:center;gap:10px;}
-  .quiz-opt.correct{border-color:var(--verde);background:#E4FCEE;}
-  .quiz-opt.wrong{border-color:#E05A5A;background:#FDE8E8;}
-  .confetti{position:absolute;top:-20px;border-radius:2px;pointer-events:none;}
-  #footer-credit{position:absolute;bottom:6px;right:10px;color:#ffffffaa;font-size:.65em;z-index:5;}
-  ::-webkit-scrollbar{display:none;}
-  @keyframes drift{0%{transform:translateX(-6%);}100%{transform:translateX(6%);}}
-  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
-  @keyframes waveMove{0%{background-position-x:0;}100%{background-position-x:120px;}}
-  .cine-wave{position:absolute;left:0;right:0;bottom:0;height:70px;
-    background:linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.05)),
-      repeating-linear-gradient(115deg, rgba(255,255,255,.18) 0 14px, transparent 14px 30px);
-    animation:waveMove 3.5s linear infinite;}
-  .cine-sun{position:absolute;top:14%;left:12%;width:70px;height:70px;border-radius:50%;
-    background:radial-gradient(circle,#FFE59A,#FFC93C 70%);box-shadow:0 0 40px 10px rgba(255,201,60,.55);animation:bob 4s ease-in-out infinite;}
-  .cine-leaf{position:absolute;animation:bob 5s ease-in-out infinite;}
+:root{
+  --river:#1F7FC2; --river-d:#12557F; --river-l:#5BB6EE;
+  --estero:#2FA36B; --estero-d:#1C7A4C; --estero-l:#6FD79E;
+  --sun:#F2B544; --sun-d:#C98A1E;
+  --clay:#D9694B; --clay-d:#A9472F;
+  --violet:#8C6FE0;
+  --ink:#06212B; --ink-2:#0B2E3B; --ink-3:#114050;
+  --paper:#F6F2E7; --paper-2:#EDE6D6;
+  --txt:#EAF6F5; --txt-dim:#9FBDC4;
+  --line:rgba(255,255,255,.12);
+  --ok:#3FD08A; --bad:#FF6B6B;
+  --r-s:10px; --r-m:16px; --r-l:24px; --r-xl:32px;
+  --topbar:58px;
+  --fs-base:16px;
+  --font-ui:'Outfit',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-dis:'Fraunces','Outfit',Georgia,serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:var(--font-ui);font-size:var(--fs-base);color:var(--txt);
+  background:var(--ink);overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body.dys{--font-ui:'Outfit',Verdana,sans-serif;letter-spacing:.4px;line-height:1.7;}
+button,input,select{font-family:inherit;}
+#app{position:fixed;inset:0;overflow:hidden;}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.screen.on{display:flex;animation:fade .35s ease both;}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.stagger>*{animation:rise .4s ease both;}
+.stagger>*:nth-child(1){animation-delay:.03s}.stagger>*:nth-child(2){animation-delay:.08s}
+.stagger>*:nth-child(3){animation-delay:.13s}.stagger>*:nth-child(4){animation-delay:.18s}
+.stagger>*:nth-child(5){animation-delay:.23s}.stagger>*:nth-child(6){animation-delay:.28s}
+.stagger>*:nth-child(7){animation-delay:.33s}.stagger>*:nth-child(8){animation-delay:.38s}
 
-  /* ====== ECOCICLO PRO UI REFRESH ====== */
-  :root{
-    --ink:#102A43; --muted:#587087; --surface:rgba(255,255,255,.94);
-    --surface2:rgba(255,255,255,.78); --line:rgba(16,42,67,.10);
-    --shadow:0 18px 45px rgba(7,37,52,.22);
-    --shadow-sm:0 8px 20px rgba(7,37,52,.16);
-    --radius-xl:32px; --radius-lg:24px; --radius-md:18px;
-  }
-  html,body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#071f2a;}
-  body{letter-spacing:-.01em;}
-  .screen{padding:24px;justify-content:center;}
-  .screen.hud{padding-top:calc(var(--topbar-h) + 20px);}
-  h1{font-size:clamp(2.4rem,6vw,4.8rem);line-height:.95;letter-spacing:-.055em;font-weight:900;text-shadow:0 8px 25px rgba(0,0,0,.18);}
-  h2{font-size:clamp(1.35rem,3vw,2rem);font-weight:850;letter-spacing:-.035em;}
-  p.sub{font-size:1rem;line-height:1.55;max-width:620px;color:#eafaf6;}
-  .card{
-    background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(247,252,250,.94));
-    border:1px solid rgba(255,255,255,.7); border-radius:var(--radius-xl);
-    padding:28px; box-shadow:var(--shadow); backdrop-filter:blur(16px);
-    max-width:720px;
-  }
-  .btn{
-    border-radius:15px; padding:14px 22px; min-width:170px;
-    font-size:.98rem; font-weight:800; letter-spacing:.01em;
-    box-shadow:0 5px 0 #c98a00,0 10px 22px rgba(0,0,0,.12);
-    transition:transform .15s ease,filter .15s ease,box-shadow .15s ease;
-  }
-  .btn:hover{filter:brightness(1.04);transform:translateY(-2px);}
-  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #c98a00,0 4px 10px rgba(0,0,0,.12);}
-  .btn.green{box-shadow:0 5px 0 var(--verde2),0 10px 22px rgba(0,0,0,.12);}
-  .btn.blue{box-shadow:0 5px 0 var(--azul2),0 10px 22px rgba(0,0,0,.12);}
-  .btn.pink{box-shadow:0 5px 0 #c24870,0 10px 22px rgba(0,0,0,.12);}
-  .rowbtns{gap:12px;}
-  #topbar{
-    height:76px;padding:12px 18px;gap:10px;
-    background:linear-gradient(180deg,rgba(5,29,39,.78),rgba(5,29,39,.08));
-    backdrop-filter:blur(8px);
-  }
-  .pill{
-    border:1px solid rgba(255,255,255,.55); border-radius:14px;padding:8px 12px;
-    box-shadow:0 6px 16px rgba(0,0,0,.16);font-size:.88rem;
-  }
-  .iconbtn{
-    width:44px;height:44px;border-radius:14px;font-size:1.05rem;
-    box-shadow:0 6px 16px rgba(0,0,0,.16);transition:.15s ease;
-  }
-  .iconbtn:hover{transform:translateY(-2px);}
-  #hud-avatar{display:flex;align-items:center;margin-right:auto;}
-  .avatar-opt{
-    width:104px;height:104px;border-radius:26px;border:2px solid rgba(255,255,255,.7);
-    box-shadow:var(--shadow-sm);transition:.18s ease;
-  }
-  .avatar-opt:hover{transform:translateY(-4px) scale(1.02);}
-  .avatar-opt.selected{border-color:var(--amarillo);box-shadow:0 0 0 5px rgba(255,201,60,.24),var(--shadow-sm);transform:translateY(-3px);}
-  .age-card{
-    width:190px;margin:8px;border:2px solid transparent;border-radius:24px;
-    transition:.18s ease;
-  }
-  .age-card:hover{transform:translateY(-5px);box-shadow:0 14px 28px rgba(0,0,0,.18);}
-  .age-card.selected{border-color:var(--verde);box-shadow:0 0 0 5px rgba(63,191,127,.16),var(--shadow-sm);}
-  .progressbar{height:10px;background:#dcece6;border-radius:99px;width:100%;overflow:hidden;}
-  .progressbar>div{background:linear-gradient(90deg,#3fbf7f,#1ca7ec);border-radius:99px;}
-  .timerbar{height:9px;background:rgba(255,255,255,.42);border-radius:99px;box-shadow:0 2px 8px rgba(0,0,0,.1);}
-  .timerbar>div{background:linear-gradient(90deg,#ffcc4d,#ff704f);border-radius:99px;}
-  .quiz-opt{
-    border:1px solid var(--line);border-radius:15px;padding:14px 16px;
-    box-shadow:0 5px 14px rgba(16,42,67,.07);font-weight:650;transition:.14s ease;
-  }
-  .quiz-opt:hover{transform:translateX(3px);border-color:#8acdb0;}
-  .toast{top:11%;border-radius:14px;padding:12px 18px;box-shadow:var(--shadow-sm);}
-  .map-node{
-    width:92px;height:92px;border:4px solid rgba(255,255,255,.95);
-    box-shadow:0 10px 24px rgba(0,0,0,.25);transition:transform .18s ease,filter .18s ease;
-  }
-  .map-node:not(.locked):hover{transform:scale(1.08);}
-  .map-node .badge{bottom:-12px;border-radius:9px;padding:3px 8px;font-size:.62rem;box-shadow:0 4px 10px rgba(0,0,0,.14);}
-  .map-node.locked{opacity:.72;}
-  .dropzone{border-width:3px;border-radius:22px;background:rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
-  .draggable{transition:transform .12s ease;box-shadow:0 12px 24px rgba(0,0,0,.16)!important;}
-  .draggable:active{transform:scale(1.05);}
-  .cine-wave{opacity:.55;}
-  .cine-sun{opacity:.9;}
-  @media(max-width:680px){
-    :root{--topbar-h:66px;}
-    #topbar{height:66px;padding:9px 10px;}
-    .pill{padding:7px 9px;font-size:.8rem;}
-    .iconbtn{width:38px;height:38px;border-radius:12px;}
-    .card{padding:22px;border-radius:26px;}
-    .avatar-opt{width:82px;height:82px;border-radius:22px;}
-    .age-card{width:150px;padding:14px 12px;}
-    .map-node{width:78px;height:78px;}
-    .map-node .badge{font-size:.55rem;}
-  }
+/* ---------- fondo ---------- */
+.bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:
+   radial-gradient(1200px 520px at 15% -5%, rgba(91,182,238,.22), transparent 65%),
+   radial-gradient(900px 500px at 92% 8%, rgba(242,181,68,.16), transparent 62%),
+   radial-gradient(1000px 700px at 50% 108%, rgba(47,163,107,.22), transparent 70%),
+   linear-gradient(175deg,#082635 0%,#06212B 45%,#05191F 100%);
+}
+.bg .grain{position:absolute;inset:0;opacity:.25;
+  background-image:radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px);
+  background-size:3px 3px;}
+.bg .wave{position:absolute;left:-10%;width:120%;height:200px;opacity:.5;}
+.content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;}
 
+/* ---------- tipografía ---------- */
+h1,h2,h3{margin:0;font-weight:700;line-height:1.15;}
+.display{font-family:var(--font-dis);font-weight:800;letter-spacing:-.5px;}
+.eyebrow{font-size:.72rem;letter-spacing:2.4px;text-transform:uppercase;color:var(--sun);font-weight:600;}
+.muted{color:var(--txt-dim);}
+.lead{font-size:1.02rem;line-height:1.6;color:#CFE6E7;}
+
+/* ---------- botones ---------- */
+.btn{position:relative;border:0;border-radius:var(--r-m);padding:14px 24px;font-size:1rem;font-weight:600;
+  cursor:pointer;color:#06212B;background:linear-gradient(180deg,#FFD979,var(--sun));
+  box-shadow:0 6px 0 var(--sun-d),0 10px 24px rgba(0,0,0,.35);transition:transform .08s,box-shadow .08s,filter .15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--sun-d),0 4px 12px rgba(0,0,0,.3);}
+.btn:disabled{filter:grayscale(.7) brightness(.8);cursor:not-allowed;}
+.btn.green{background:linear-gradient(180deg,#7FE7B4,var(--estero));box-shadow:0 6px 0 var(--estero-d),0 10px 24px rgba(0,0,0,.35);color:#04291A;}
+.btn.blue{background:linear-gradient(180deg,#8ACFF6,var(--river));box-shadow:0 6px 0 var(--river-d),0 10px 24px rgba(0,0,0,.35);color:#04263A;}
+.btn.ghost{background:rgba(255,255,255,.07);color:var(--txt);border:1px solid var(--line);box-shadow:none;}
+.btn.ghost:active{transform:translateY(2px);}
+.btn.sm{padding:10px 16px;font-size:.88rem;border-radius:12px;box-shadow:0 4px 0 rgba(0,0,0,.25);}
+.btn.block{width:100%;}
+.icon-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);
+  color:var(--txt);font-size:1rem;cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(8px);}
+.icon-btn:active{transform:scale(.93);}
+
+/* ---------- superficies ---------- */
+.panel{background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+  border:1px solid var(--line);border-radius:var(--r-l);padding:20px;backdrop-filter:blur(12px);
+  box-shadow:0 18px 40px rgba(0,0,0,.32);}
+.panel.tight{padding:14px;border-radius:var(--r-m);}
+.wrap{width:100%;max-width:820px;margin:0 auto;padding:16px 18px 40px;}
+.wrap.narrow{max-width:620px;}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100%;}
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.09);border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px;font-size:.78rem;font-weight:600;color:#D7EDEA;}
+.chip.gold{background:rgba(242,181,68,.16);border-color:rgba(242,181,68,.45);color:#FFDB92;}
+.chip.green{background:rgba(47,163,107,.18);border-color:rgba(47,163,107,.5);color:#9BEFC4;}
+.chip.blue{background:rgba(31,127,194,.2);border-color:rgba(91,182,238,.45);color:#B3E0FF;}
+.divider{height:1px;background:var(--line);margin:16px 0;}
+
+/* ---------- topbar ---------- */
+#topbar{position:sticky;top:0;z-index:30;height:var(--topbar);flex:0 0 auto;
+  display:flex;align-items:center;gap:8px;padding:0 12px;
+  background:linear-gradient(180deg,rgba(6,33,43,.92),rgba(6,33,43,.55));backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);}
+#topbar .grow{flex:1;min-width:0;}
+.stat{display:flex;align-items:center;gap:5px;font-weight:700;font-size:.86rem;background:rgba(255,255,255,.07);
+  border:1px solid var(--line);border-radius:999px;padding:6px 11px;white-space:nowrap;}
+.stat small{font-weight:500;color:var(--txt-dim);}
+
+/* ---------- barra de progreso ---------- */
+.bar{height:9px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;}
+.bar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--estero-l),var(--estero));
+  transition:width .5s cubic-bezier(.2,.8,.2,1);}
+.bar.gold>i{background:linear-gradient(90deg,#FFDD8A,var(--sun));}
+.bar.thin{height:6px;}
+
+/* ---------- mapa ---------- */
+#mapHost{position:relative;width:100%;max-width:760px;margin:0 auto;aspect-ratio:3/4.05;}
+#mapHost svg.terrain{position:absolute;inset:0;width:100%;height:100%;}
+.node{position:absolute;transform:translate(-50%,-50%);width:74px;text-align:center;cursor:pointer;}
+.node .disc{width:62px;height:62px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;
+  border:3px solid rgba(255,255,255,.85);box-shadow:0 10px 22px rgba(0,0,0,.45);position:relative;
+  background:linear-gradient(180deg,#2C687F,#17475A);transition:transform .15s;}
+.node:active .disc{transform:scale(.94);}
+.node.done .disc{background:linear-gradient(180deg,#63DFA5,var(--estero-d));}
+.node.next .disc{background:linear-gradient(180deg,#FFD979,var(--sun-d));animation:float 2.6s ease-in-out infinite;
+  box-shadow:0 0 0 6px rgba(242,181,68,.2),0 10px 22px rgba(0,0,0,.45);}
+.node.locked{cursor:not-allowed;}
+.node.locked .disc{filter:grayscale(1) brightness(.6);border-color:rgba(255,255,255,.35);}
+.node .nm{font-size:.63rem;font-weight:700;margin-top:6px;line-height:1.2;text-shadow:0 2px 6px rgba(0,0,0,.9);}
+.node .st{position:absolute;top:-6px;right:-2px;font-size:.62rem;background:#06212B;border:1px solid var(--line);
+  border-radius:999px;padding:2px 6px;font-weight:700;}
+.node .num{position:absolute;left:-4px;top:-4px;width:22px;height:22px;border-radius:50%;background:#06212B;
+  border:1px solid var(--line);font-size:.7rem;display:grid;place-items:center;font-weight:700;}
+
+/* ---------- juego ---------- */
+.gamehead{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.prompt{background:rgba(255,255,255,.06);border:1px solid var(--line);border-left:3px solid var(--sun);
+  border-radius:12px;padding:12px 14px;font-size:.93rem;line-height:1.5;}
+.card-item{animation:pop .3s ease both;}
+.opt{width:100%;text-align:left;background:rgba(255,255,255,.06);border:1.5px solid var(--line);border-radius:var(--r-m);
+  padding:14px 16px;color:var(--txt);font-size:.95rem;cursor:pointer;transition:.15s;display:flex;gap:12px;align-items:flex-start;
+  line-height:1.45;}
+.opt:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);}
+.opt:active{transform:scale(.99);}
+.opt .k{flex:0 0 auto;width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.12);display:grid;place-items:center;
+  font-weight:700;font-size:.8rem;}
+.opt.ok{background:rgba(63,208,138,.18);border-color:var(--ok);}
+.opt.no{background:rgba(255,107,107,.15);border-color:var(--bad);animation:shake .4s;}
+.opt.dim{opacity:.45;}
+.opt.sel{border-color:var(--sun);background:rgba(242,181,68,.15);}
+.optgrid{display:grid;gap:10px;}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bin{border-radius:var(--r-m);border:2px dashed rgba(255,255,255,.28);background:rgba(255,255,255,.05);
+  padding:14px 10px;text-align:center;cursor:pointer;transition:.15s;}
+.bin:active{transform:scale(.97);}
+.bin b{display:block;font-size:.95rem;margin-top:4px;}
+.bin span{font-size:.72rem;color:var(--txt-dim);display:block;margin-top:3px;line-height:1.3;}
+.feedback{border-radius:var(--r-m);padding:13px 15px;font-size:.9rem;line-height:1.55;animation:rise .3s ease both;}
+.feedback.ok{background:rgba(63,208,138,.14);border:1px solid rgba(63,208,138,.45);}
+.feedback.no{background:rgba(255,107,107,.13);border:1px solid rgba(255,107,107,.45);}
+.feedback b{display:block;margin-bottom:4px;font-size:.95rem;}
+.meters{display:grid;gap:9px;}
+.meter{display:grid;grid-template-columns:104px 1fr 42px;align-items:center;gap:9px;font-size:.78rem;}
+.meter .bar{height:10px;}
+.tile{background:rgba(255,255,255,.06);border:1.5px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;
+  text-align:center;font-size:.85rem;font-weight:600;transition:.15s;line-height:1.3;}
+.tile:active{transform:scale(.96);}
+.tile.sel{border-color:var(--sun);background:rgba(242,181,68,.16);}
+.tile.ok{border-color:var(--ok);background:rgba(63,208,138,.18);}
+.tile.no{border-color:var(--bad);background:rgba(255,107,107,.15);}
+.tile.used{opacity:.35;pointer-events:none;}
+.tile .em{display:block;font-size:1.5rem;margin-bottom:5px;}
+.seq{display:flex;flex-wrap:wrap;gap:7px;min-height:44px;padding:9px;border-radius:12px;background:rgba(0,0,0,.25);
+  border:1px dashed var(--line);}
+.seq .s{background:rgba(242,181,68,.2);border:1px solid rgba(242,181,68,.5);border-radius:9px;padding:6px 10px;font-size:.78rem;font-weight:600;}
+.hearts{letter-spacing:2px;font-size:.95rem;}
+.timer{font-variant-numeric:tabular-nums;}
+.timer.warn{color:#FFB4B4;animation:shake .5s infinite;}
+
+/* ---------- toast / overlay ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:200;
+  background:rgba(6,33,43,.96);border:1px solid var(--line);border-radius:14px;padding:12px 20px;font-weight:600;
+  font-size:.9rem;opacity:0;transition:.3s;pointer-events:none;box-shadow:0 12px 30px rgba(0,0,0,.5);max-width:90vw;text-align:center;}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:150;}
+#modal{position:fixed;inset:0;z-index:180;display:none;align-items:center;justify-content:center;padding:18px;
+  background:rgba(3,15,20,.75);backdrop-filter:blur(6px);}
+#modal.on{display:flex;}
+#modal .panel{max-width:560px;width:100%;max-height:88vh;overflow-y:auto;animation:pop .28s ease both;}
+
+/* ---------- varios ---------- */
+.avatars{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:10px;}
+.av{border-radius:18px;border:2px solid var(--line);background:rgba(255,255,255,.05);padding:10px 6px;cursor:pointer;text-align:center;transition:.15s;}
+.av.sel{border-color:var(--sun);background:rgba(242,181,68,.14);}
+.av svg{width:58px;height:58px;}
+.av b{display:block;font-size:.72rem;margin-top:4px;}
+.av small{display:block;font-size:.6rem;color:var(--txt-dim);}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;}
+.badge{text-align:center;padding:12px 6px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:.68rem;line-height:1.25;}
+.badge.off{opacity:.3;filter:grayscale(1);}
+.badge .e{font-size:1.6rem;display:block;margin-bottom:5px;}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:.87rem;padding:7px 0;border-bottom:1px dashed var(--line);}
+.kv:last-child{border:0;}
+table.tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.tbl th,table.tbl td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.tbl th{color:var(--sun);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;}
+.stars{color:var(--sun);letter-spacing:3px;font-size:1.3rem;}
+input[type=text]{width:100%;background:rgba(255,255,255,.08);border:1.5px solid var(--line);border-radius:12px;
+  padding:12px 14px;color:var(--txt);font-size:1rem;}
+input[type=text]:focus{outline:none;border-color:var(--sun);}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:.9rem;}
+.sw{width:50px;height:28px;border-radius:999px;background:rgba(255,255,255,.15);border:1px solid var(--line);position:relative;cursor:pointer;flex:0 0 auto;}
+.sw i{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s;}
+.sw.on{background:var(--estero);}
+.sw.on i{left:25px;}
+.cert{background:linear-gradient(160deg,#FBF7EC,#EFE7D3);color:#12333F;border-radius:20px;padding:26px 22px;text-align:center;
+  border:3px double #C9A45B;box-shadow:0 20px 50px rgba(0,0,0,.45);}
+.cert h2{font-family:var(--font-dis);font-size:1.5rem;color:#0E3A2C;}
+.cert .nm{font-family:var(--font-dis);font-size:1.7rem;margin:10px 0;border-bottom:2px solid #C9A45B;display:inline-block;padding:0 18px 6px;}
+.scroll-x{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;}
+.scroll-x::-webkit-scrollbar{display:none;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:8px;}
+@media(max-width:420px){
+  :root{--fs-base:15px;}
+  .wrap{padding:14px 13px 36px;}
+  .node{width:64px;} .node .disc{width:52px;height:52px;font-size:1.3rem;}
+}
+@media print{
+  body{background:#fff;overflow:visible;}
+  .noprint{display:none!important;}
+  .screen{position:static;display:block;overflow:visible;}
+  .bg{display:none;}
+  .panel,.cert{box-shadow:none;color:#000;}
+}
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="topbar" style="display:none;">
-    <div id="hud-avatar"></div>
-    <div class="pill">💧 <span id="hud-drops">0</span></div>
-    <div class="pill">⭐ <span id="hud-stars">0</span></div>
-    <div id="hud-hints"></div>
-    <button class="iconbtn" id="btn-store" title="Recompensas" aria-label="Abrir recompensas">🛍️</button>
-    <button class="iconbtn" id="btn-sound" title="Sonido" aria-label="Activar o desactivar sonido">🔊</button>
-    <button class="iconbtn" id="btn-home" title="Mapa" aria-label="Volver al mapa">🏠</button>
+  <div class="bg">
+    <div class="grain"></div>
+    <svg class="wave" style="bottom:-40px" viewBox="0 0 1200 200" preserveAspectRatio="none">
+      <path d="M0,120 C200,60 320,170 520,120 C720,70 860,160 1060,110 C1140,90 1180,100 1200,95 L1200,200 L0,200Z" fill="rgba(31,127,194,.18)"/>
+    </svg>
+    <svg class="wave" style="bottom:-70px" viewBox="0 0 1200 200" preserveAspectRatio="none">
+      <path d="M0,140 C180,90 400,180 600,130 C800,80 980,170 1200,120 L1200,200 L0,200Z" fill="rgba(47,163,107,.18)"/>
+    </svg>
   </div>
-  <div id="stage"></div>
 </div>
-
+<div id="toast"></div>
+<canvas id="fx"></canvas>
+<div id="modal"><div class="panel" id="modalBody"></div></div>
 <script>
-/* ============ AUDIO (sintetizado, sin archivos externos) ============ */
-const AudioX = (()=>{
-  let ctx=null, on=true;
-  function ensure(){
-    if(!ctx){ ctx = new (window.AudioContext||window.webkitAudioContext)(); }
-    if(ctx.state==='suspended'){ ctx.resume(); }
-  }
-  function beep(freq=440,dur=.12,type='sine',vol=.18,delay=0){
-    if(!on) return; ensure();
-    const t=ctx.currentTime+delay;
-    const o=ctx.createOscillator(), g=ctx.createGain();
-    o.type=type; o.frequency.setValueAtTime(freq,t);
-    g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(vol,t+.015);
-    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-    o.connect(g); g.connect(ctx.destination);
-    o.start(t); o.stop(t+dur+.02);
-  }
-  return {
-    toggle(){ on=!on; return on; },
-    click(){ beep(520,.06,'triangle',.15); },
-    correct(){ beep(660,.1,'sine',.2); beep(880,.14,'sine',.2,.09); beep(1100,.18,'sine',.2,.18); },
-    wrong(){ beep(180,.22,'sawtooth',.15); },
-    win(){ [523,659,784,1046].forEach((f,i)=>beep(f,.18,'sine',.22,i*.11)); },
-    drop(){ beep(300,.08,'square',.12); },
-    pop(){ beep(700+Math.random()*200,.07,'triangle',.12); },
-    tick(){ beep(1000,.04,'square',.06); },
-    isOn(){ return on; },
-    unlock(){ ensure(); }
+/* =========================================================
+   ECOCICLO CORRIENTES — LA RUTA CIRCULAR
+   Juego educativo de economía circular · Provincia de Corrientes
+   ========================================================= */
+const APP = document.getElementById('app');
+
+/* ---------------- Estado ---------------- */
+const DEFAULT = {
+  name:'', avatar:'carpincho', band:'', xp:0, coins:0,
+  levels:{}, badges:[], seen:{}, done:false, certName:'',
+  settings:{sound:true, timer:true, dys:false, aula:false},
+  stats:{correct:0, total:0, played:0}
+};
+let S = JSON.parse(JSON.stringify(DEFAULT));
+const SAVE_KEY='ecociclo_ctes_v2';
+function save(){ try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){} }
+function load(){ try{const r=localStorage.getItem(SAVE_KEY); if(r){S=Object.assign(JSON.parse(JSON.stringify(DEFAULT)),JSON.parse(r)); S.settings=Object.assign({},DEFAULT.settings,S.settings||{}); S.stats=Object.assign({},DEFAULT.stats,S.stats||{});}}catch(e){} }
+
+/* ---------------- Audio ---------------- */
+const Snd=(()=>{ let ctx=null;
+  const ok=()=>{ if(!S.settings.sound) return false; try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();}catch(e){return false;} if(ctx.state==='suspended')ctx.resume(); return true; };
+  function t(f,d=.12,type='sine',v=.14,at=0){ if(!ok())return; const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;o.frequency.value=f;o.connect(g);g.connect(ctx.destination);const s=ctx.currentTime+at;
+    g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(v,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+d);
+    o.start(s);o.stop(s+d+.02);}
+  return{
+    tap:()=>t(520,.06,'triangle',.08),
+    good:()=>{t(660,.1,'sine',.13);t(880,.13,'sine',.12,.08);t(1180,.16,'sine',.1,.17);},
+    bad:()=>{t(200,.16,'sawtooth',.09);t(150,.2,'sawtooth',.08,.1);},
+    win:()=>{[523,659,784,1047].forEach((f,i)=>t(f,.22,'triangle',.13,i*.11));},
+    lose:()=>{[392,330,262].forEach((f,i)=>t(f,.25,'sine',.11,i*.13));},
+    coin:()=>{t(1280,.07,'square',.07);t(1720,.09,'square',.06,.05);}
   };
 })();
-document.addEventListener('touchstart',()=>AudioX.unlock(),{once:true,passive:true});
-document.addEventListener('click',()=>AudioX.unlock(),{once:true});
 
-/* ============ ESTADO GLOBAL ============ */
-const State = {
-  avatar: 0,
-  ageBand: null, // 'a' 6-8, 'b' 8-10, 'c' 10-12
-  drops: 0,
-  stars: {}, // levelId -> stars
-  currentLevel: null,
-  owned: [],
-  hints: 0,
-  equipped: { frame:null, mascot:null },
-};
-function saveState(){ try{ localStorage.setItem('ecociclo_save', JSON.stringify(State)); }catch(e){} }
-function loadState(){ try{ const s = JSON.parse(localStorage.getItem('ecociclo_save')); if(s) Object.assign(State,s);}catch(e){} }
-loadState();
-// migración: re-aplicar efectos de compras hechas en versiones anteriores donde no se aplicaban
-if(State.owned && State.owned.length){
-  if(!State.equipped) State.equipped={frame:null,mascot:null};
-  if(State.owned.includes('marco_hoja')) State.equipped.frame='hoja';
-  if(State.owned.includes('marco_oro')) State.equipped.frame='oro';
-  if(State.owned.includes('mascota_pez')) State.equipped.mascot='🐟';
-  if(State.owned.includes('mascota_yacare')) State.equipped.mascot='🐊';
-  if(State.hints===undefined) State.hints = State.owned.filter(k=>k==='pista').length;
-  saveState();
+/* ---------------- FX confeti ---------------- */
+const fx=document.getElementById('fx'); let fxc=null; try{fxc=fx.getContext('2d');}catch(e){} let parts=[],raf=null;
+function sizeFx(){ if(!fxc) return; fx.width=innerWidth*devicePixelRatio; fx.height=innerHeight*devicePixelRatio; fx.style.width=innerWidth+'px'; fx.style.height=innerHeight+'px'; fxc.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+addEventListener('resize',sizeFx); sizeFx();
+function confetti(n=60){ if(!fxc) return;
+  const cols=['#F2B544','#2FA36B','#1F7FC2','#D9694B','#8C6FE0','#6FD79E'];
+  for(let i=0;i<n;i++) parts.push({x:innerWidth/2+(Math.random()-.5)*160,y:innerHeight*.35,
+    vx:(Math.random()-.5)*9, vy:-Math.random()*11-4, g:.32+Math.random()*.2,
+    s:5+Math.random()*7, r:Math.random()*6, vr:(Math.random()-.5)*.35, c:cols[i%cols.length], life:90+Math.random()*50});
+  if(!raf) loopFx();
+}
+function loopFx(){ if(!fxc) return; fxc.clearRect(0,0,innerWidth,innerHeight);
+  parts=parts.filter(p=>p.life>0);
+  parts.forEach(p=>{ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.life--;
+    fxc.save();fxc.translate(p.x,p.y);fxc.rotate(p.r);fxc.fillStyle=p.c;fxc.globalAlpha=Math.min(1,p.life/40);
+    fxc.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);fxc.restore(); });
+  if(parts.length) raf=requestAnimationFrame(loopFx); else {raf=null;fxc.clearRect(0,0,innerWidth,innerHeight);}
 }
 
-const AVATAR_NAMES = ['Carpincho','Tatú mulita','Yaguareté','Yacaré','Tortuga','Cotorra'];
-function svgCapybara(){return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="60" rx="38" ry="26" fill="#A9773F"/><ellipse cx="50" cy="60" rx="38" ry="26" fill="none" stroke="#7A5230" stroke-width="3"/><circle cx="78" cy="45" r="19" fill="#B98847"/><circle cx="70" cy="34" r="6" fill="#7A5230"/><circle cx="86" cy="34" r="6" fill="#7A5230"/><circle cx="90" cy="46" r="3" fill="#3B2413"/><ellipse cx="92" cy="52" rx="4" ry="3" fill="#3B2413"/></svg>`;}
-function svgArmadillo(){return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="62" rx="34" ry="22" fill="#C9B18C"/><path d="M18 55 A34 22 0 0 1 82 55" fill="none" stroke="#8C7350" stroke-width="4"/><path d="M22 62 A30 18 0 0 1 78 62" fill="none" stroke="#8C7350" stroke-width="3"/><path d="M26 70 A26 14 0 0 1 74 70" fill="none" stroke="#8C7350" stroke-width="3"/><ellipse cx="80" cy="58" rx="14" ry="10" fill="#C9B18C" transform="rotate(20 80 58)"/><circle cx="90" cy="55" r="2.5" fill="#3B2413"/><ellipse cx="20" cy="72" rx="6" ry="10" fill="#C9B18C"/></svg>`;}
-function svgJaguar(){return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="58" rx="34" ry="26" fill="#F2A65A"/><circle cx="30" cy="30" r="9" fill="#F2A65A"/><circle cx="70" cy="30" r="9" fill="#F2A65A"/><circle cx="50" cy="42" r="26" fill="#F2A65A"/><circle cx="40" cy="38" r="3" fill="#3B2413"/><circle cx="60" cy="38" r="3" fill="#3B2413"/><ellipse cx="50" cy="50" rx="4" ry="3" fill="#3B2413"/><circle cx="34" cy="52" r="2.5" fill="#3B2413"/><circle cx="66" cy="52" r="2.5" fill="#3B2413"/><circle cx="26" cy="65" r="2.5" fill="#3B2413"/><circle cx="74" cy="65" r="2.5" fill="#3B2413"/><circle cx="44" cy="68" r="2.5" fill="#3B2413"/><circle cx="56" cy="68" r="2.5" fill="#3B2413"/></svg>`;}
-function svgCaiman(){return `<svg viewBox="0 0 100 100"><ellipse cx="55" cy="62" rx="34" ry="16" fill="#4F8F5E"/><path d="M18 62 Q6 58 4 66 Q10 70 20 68 Z" fill="#3F7A4C"/><rect x="30" y="50" width="12" height="6" fill="#3F7A4C"/><rect x="48" y="50" width="12" height="6" fill="#3F7A4C"/><rect x="66" y="50" width="10" height="6" fill="#3F7A4C"/><circle cx="30" cy="45" r="3" fill="#F2C744"/><circle cx="42" cy="45" r="3" fill="#F2C744"/></svg>`;}
-function svgTurtle(){return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="55" rx="30" ry="24" fill="#3FBF7F"/><path d="M50 32 a26 22 0 0 1 0 46 a26 22 0 0 1 0-46" fill="none" stroke="#279A5F" stroke-width="2"/><path d="M30 55h40M50 32v46M35 40l30 30M65 40l-30 30" stroke="#279A5F" stroke-width="2"/><circle cx="83" cy="50" r="9" fill="#3FBF7F"/><ellipse cx="20" cy="72" rx="6" ry="9" fill="#3FBF7F"/><ellipse cx="78" cy="72" rx="6" ry="9" fill="#3FBF7F"/></svg>`;}
-function svgParrot(){return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="60" rx="20" ry="30" fill="#4CAF6B"/><circle cx="50" cy="30" r="16" fill="#6FCB6F"/><path d="M60 28 q14 2 12 12 q-10 2 -14-6 Z" fill="#F2A65A"/><circle cx="45" cy="26" r="2.5" fill="#222"/><path d="M40 62 q-14 6 -10 20 q12 -2 16-14Z" fill="#2E7D53"/><path d="M60 62 q14 6 10 20 q-12 -2 -16-14Z" fill="#2E7D53"/></svg>`;}
-const AVATARS = [svgCapybara,svgArmadillo,svgJaguar,svgCaiman,svgTurtle,svgParrot];
-const AVATAR_COLORS = ['#A9773F','#C9B18C','#F2A65A','#4F8F5E','#3FBF7F','#4CAF6B'];
-
-/* Niveles: contenido temático de economía circular / de corrientes (agua, residuos, energía) */
-const LEVELS = [
-  {id:'l1', name:'El Paraná Herido', icon:'💧', theme:'Ciclo del agua y contaminación', color:'var(--azul)'},
-  {id:'l2', name:'Esteros del Iberá', icon:'🗑️', theme:'Separar residuos', color:'var(--marron)'},
-  {id:'l3', name:'Taller en Corrientes', icon:'🔧', theme:'Reutilizar y reparar', color:'var(--naranja)'},
-  {id:'l4', name:'Fábrica Circular Correntina', icon:'🏭', theme:'De residuo a recurso', color:'var(--violeta)'},
-  {id:'l5', name:'Represa de Yacyretá', icon:'⚡', theme:'Energías limpias', color:'var(--amarillo)'},
-  {id:'l6', name:'Consejo de Corrientes', icon:'🌍', theme:'Decisiones finales', color:'var(--verde)'},
-];
-
-function difficultyFor(band){
-  // Escala parámetros de juego según edad, sin decir "difícil/fácil"
-  if(band==='a') return {time:999, items:4, distract:1, lives:5, quizChoices:2, speed:0.7};
-  if(band==='b') return {time:45, items:6, distract:2, lives:3, quizChoices:3, speed:1};
-  return {time:30, items:8, distract:3, lives:2, quizChoices:4, speed:1.35};
+/* ---------------- Utilidades UI ---------------- */
+function toast(msg,ms=1800){ const t=document.getElementById('toast'); t.innerHTML=msg; t.classList.add('on');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),ms); }
+function modal(html){ document.getElementById('modalBody').innerHTML=html; document.getElementById('modal').classList.add('on'); }
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+let stopTimer=null;
+function screen(html,opts={}){
+  if(stopTimer){stopTimer();stopTimer=null;}
+  const old=APP.querySelector('.screen'); if(old) old.remove();
+  const d=document.createElement('div'); d.className='screen on'; d.id='scr';
+  d.innerHTML=(opts.bar===false?'':topbar(opts))+`<div class="content">${html}</div>`;
+  APP.appendChild(d); d.scrollTop=0; bindTop();
+  return d;
 }
-
-/* ============ NAVEGACIÓN DE PANTALLAS ============ */
-const stage = document.getElementById('stage');
-const topbar = document.getElementById('topbar');
-let activeTimer = null;
-function stopActiveTimer(){ if(activeTimer){ activeTimer.stop(); activeTimer=null; } }
-function show(html, opts={}){
-  stopActiveTimer();
-  const ibera = opts.sky && State.owned && State.owned.includes('fondo_iberá') ? 'theme-ibera' : '';
-  stage.innerHTML = `<div class="screen active ${opts.sky?'bg-sky':''} ${ibera} ${(opts.hud&&!opts.full)?'hud':''} ${opts.full?'full':''}" id="scr">${html}</div>`;
-  topbar.style.display = opts.hud ? 'flex':'none';
-  if(opts.hud){ document.getElementById('hud-drops').textContent = State.drops; document.getElementById('hud-stars').textContent = Object.values(State.stars).reduce((a,b)=>a+b,0); }
-}
-document.getElementById('btn-home').onclick = ()=>{ AudioX.click(); renderMap(); };
-document.getElementById('btn-sound').onclick = (e)=>{ const on=AudioX.toggle(); e.target.textContent = on?'🔊':'🔇'; };
-document.getElementById('btn-store').onclick = ()=>{ AudioX.click(); renderStore(); };
-
-/* ============ TIENDA ============ */
-const STORE_ITEMS = [
-  {k:'marco_oro', n:'Marco Dorado', desc:'Un anillo dorado para tu avatar', cost:30, e:'⭕'},
-  {k:'marco_hoja', n:'Corona de Hojas', desc:'Adorno vegetal para tu avatar', cost:20, e:'🍃'},
-  {k:'mascota_pez', n:'Mascota: Dorado', desc:'Un pez dorado del Paraná te acompaña', cost:40, e:'🐟'},
-  {k:'mascota_yacare', n:'Mascota: Yacarecito', desc:'Un pequeño yacaré compañero', cost:50, e:'🐊'},
-  {k:'fondo_iberá', n:'Fondo: Esteros', desc:'Pinta el mapa con los colores del Iberá', cost:35, e:'🌿'},
-  {k:'pista', n:'Pista Extra', desc:'Sumá una pista para tu próximo nivel', cost:15, e:'💡'},
-];
-function applyPurchase(k){
-  if(k==='marco_oro') State.equipped.frame='oro';
-  if(k==='marco_hoja') State.equipped.frame='hoja';
-  if(k==='mascota_pez') State.equipped.mascot='🐟';
-  if(k==='mascota_yacare') State.equipped.mascot='🐊';
-  if(k==='pista') State.hints=(State.hints||0)+1;
-  // fondo_iberá se aplica solo (ver show()), no necesita estado extra
-}
-function frameStyle(frame){
-  if(frame==='oro') return 'border:4px solid #FFD34D;box-shadow:0 0 0 2px #C98A00;';
-  if(frame==='hoja') return 'border:4px solid #3FBF7F;box-shadow:0 0 0 2px #279A5F;';
-  return 'border:3px solid #fff;';
-}
-function avatarChipHTML(size){
-  size = size||40;
-  const frame = State.equipped.frame;
-  return `<div style="position:relative;width:${size}px;height:${size}px;">
-    <div style="width:100%;height:100%;border-radius:50%;background:${AVATAR_COLORS[State.avatar]}33;display:flex;align-items:center;justify-content:center;overflow:hidden;${frameStyle(frame)}">
-      <div style="width:75%;height:75%;">${AVATARS[State.avatar]()}</div>
-    </div>
-    ${State.equipped.mascot?`<div style="position:absolute;bottom:-4px;right:-6px;font-size:${size*0.42}px;">${State.equipped.mascot}</div>`:''}
+function topbar(o={}){
+  return `<div id="topbar" class="noprint">
+    ${o.back?`<button class="icon-btn" data-go="${o.back}">←</button>`:`<button class="icon-btn" data-go="home">🏠</button>`}
+    <div class="grow" style="font-weight:700;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.title||'EcoCiclo Corrientes'}</div>
+    ${o.hideStats?'':`<div class="stat">⭐ <span>${totalStars()}</span><small>/${LEVELS.length*3}</small></div>
+    <div class="stat">🌱 <span>${S.xp}</span></div>`}
+    <button class="icon-btn" id="btnMenu">⋯</button>
   </div>`;
 }
-function renderStore(){
-  const cards = STORE_ITEMS.map(it=>{
-    const consumable = it.k==='pista';
-    const owned = !consumable && State.owned.includes(it.k);
-    return `<div class="card" style="padding:14px;margin:6px;width:150px;">
-      <div style="font-size:2.2em;">${it.e}</div>
-      <div style="font-weight:bold;color:var(--oscuro);font-size:.95em;">${it.n}</div>
-      <div style="font-size:.75em;color:#555;margin:4px 0 8px;">${it.desc}${consumable?` <b>(tenés ${State.hints||0})</b>`:''}</div>
-      ${owned? `<div style="font-weight:bold;color:var(--verde2);">✔ Tenés esto</div>`
-        : `<button class="btn" data-k="${it.k}" data-cost="${it.cost}" style="min-width:0;padding:8px 14px;font-size:.9em;">💧${it.cost}</button>`}
-    </div>`;
-  }).join('');
-  show(`
-    <h2>Centro de recompensas 🛍️</h2>
-     <div style="font-size:.8rem;color:#587087;font-weight:700;">Personalizá tu aventura con lo que ganaste jugando.</div>
-    <p class="sub" style="margin:0 0 8px;">Canjeá tus gotas 💧 por sorpresas.</p>
-    <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:10px;">
-      ${avatarChipHTML(56)}
-      <div class="pill">💧 Tenés: ${State.drops}</div>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;max-height:55vh;overflow-y:auto;">${cards}</div>
-    <button class="btn blue" id="backmap">Volver al mapa 🗺️</button>
-  `,{sky:true, hud:true});
-  document.getElementById('backmap').onclick=()=>{ AudioX.click(); renderMap(); };
-  document.querySelectorAll('[data-cost]').forEach(b=>{
-    b.onclick=()=>{
-      const cost=+b.dataset.cost, k=b.dataset.k;
-      if(State.drops<cost){ AudioX.wrong(); toast('¡Todavía no tenés suficientes gotas!'); return; }
-      State.drops-=cost; if(k!=='pista') State.owned.push(k); applyPurchase(k); saveState(); AudioX.correct(); confettiBurst(14);
-      toast('¡Aplicado! Mirá tu avatar 🎉');
-      renderStore();
-    };
-  });
+function bindTop(){
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
+  const m=document.getElementById('btnMenu'); if(m) m.onclick=()=>{Snd.tap();menuModal();};
 }
+function go(where){ ({home:renderHome,setup:renderSetup,map:renderMap,badges:renderBadges,glos:renderGlossary,
+  docente:renderDocente,cert:renderCert,final:renderFinalChallenge}[where]||renderHome)(); }
 
-function toast(msg, ms=1400){
-  const t=document.createElement('div');
-  t.className='toast'; t.textContent=msg;
-  stage.appendChild(t);
-  requestAnimationFrame(()=>t.classList.add('show'));
-  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, ms);
-}
-function confettiBurst(n=26){
-  const colors=['#FFC93C','#3FBF7F','#1CA7EC','#FF6F9C','#8E6FE0'];
-  for(let i=0;i<n;i++){
-    const c=document.createElement('div');
-    c.className='confetti';
-    c.style.left = (10+Math.random()*80)+'%';
-    c.style.width = c.style.height = (6+Math.random()*7)+'px';
-    c.style.background = colors[i%colors.length];
-    c.style.transform = `rotate(${Math.random()*360}deg)`;
-    stage.appendChild(c);
-    const dur = 1200+Math.random()*900;
-    c.animate([
-      {transform:`translateY(0) rotate(0deg)`, opacity:1},
-      {transform:`translateY(${window.innerHeight}px) rotate(${360+Math.random()*360}deg)`, opacity:.9}
-    ],{duration:dur, easing:'ease-in'});
-    setTimeout(()=>c.remove(), dur);
-  }
-}
-
-/* ============ PANTALLA 1: TÍTULO ============ */
-function renderTitle(){
-  show(`
-    <div class="cine-sun"></div>
-    <div class="cine-leaf" style="top:20%;right:10%;font-size:2.2em;animation-delay:.5s;">🌿</div>
-    <div class="cine-leaf" style="top:32%;right:22%;font-size:1.6em;animation-delay:1.4s;">🍃</div>
-    <div class="cine-wave"></div>
-    <svg class="droplet-logo" viewBox="0 0 100 130">
-      <path d="M50 5 C 20 45, 8 65, 8 82 A42 42 0 0 0 92 82 C 92 65, 80 45, 50 5 Z" fill="#1CA7EC" stroke="#0E7FB8" stroke-width="3"/>
-      <path d="M50 5 C 20 45, 8 65, 8 82 A42 42 0 0 0 92 82" fill="none"/>
-      <ellipse cx="35" cy="70" rx="10" ry="14" fill="#7FD4FF" opacity=".7"/>
-      <circle cx="50" cy="82" r="18" fill="#3FBF7F"/>
-      <path d="M42 82 l6 6 l10 -12" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <h1>EcoCiclo<br><span style="font-size:.55em;">La Aventura Circular</span></h1>
-    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0 14px;">
-      <span class="pill">♻️ Economía circular</span><span class="pill">🌿 Corrientes</span><span class="pill">🎮 Aprendé jugando</span>
-    </div>
-    <p class="sub">Una aventura interactiva para descubrir cómo cuidar el agua, reducir residuos, reparar, reutilizar y elegir energía responsable.</p>
-    <button class="btn green" id="start">▶ Jugar</button>
-  `,{sky:true});
-  document.getElementById('start').onclick = ()=>{ AudioX.click(); renderAvatarPick(); };
-}
-
-/* ============ PANTALLA 2: ELEGIR AVATAR ============ */
-function renderAvatarPick(){
-  const opts = AVATARS.map((fn,i)=>`
-    <div style="display:flex;flex-direction:column;align-items:center;">
-      <div class="avatar-opt ${i===State.avatar?'selected':''}" data-i="${i}"
-        style="background:${AVATAR_COLORS[i]}26;">${fn()}</div>
-      <div style="font-size:.8em;font-weight:bold;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3);margin-top:4px;">${AVATAR_NAMES[i]}</div>
-    </div>
-  `).join('');
-  show(`
-    <h2>Elegí tu guía de los esteros</h2>
-    <p class="sub" style="margin:0 0 10px;">Fauna de Corrientes te va a acompañar en la aventura.</p>
-    <div class="avatar-pick">${opts}</div>
-    <button class="btn blue" id="next">Siguiente ➜</button>
-  `,{sky:true});
-  document.querySelectorAll('.avatar-opt').forEach(el=>{
-    el.onclick=()=>{ AudioX.pop(); State.avatar=+el.dataset.i; document.querySelectorAll('.avatar-opt').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
-  });
-  document.getElementById('next').onclick=()=>{ AudioX.click(); renderAgePick(); };
-}
-
-/* ============ PANTALLA 3: ELEGIR EDAD (define nivel de dificultad internamente) ============ */
-function renderAgePick(){
-  const cards = [
-    {band:'a', label:'6 a 8 años', icon:svgSprout()},
-    {band:'b', label:'8 a 10 años', icon:svgTree()},
-    {band:'c', label:'10 a 12 años', icon:svgForest()},
-  ];
-  show(`
-    <h2>¿Cuántos años tenés?</h2>
-    <p class="sub">Así preparamos tu aventura a tu medida.</p>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;">
-      ${cards.map(c=>`<div class="age-card" data-b="${c.band}">${c.icon}<div style="font-weight:bold;color:var(--oscuro);margin-top:6px;">${c.label}</div></div>`).join('')}
-    </div>
-    <button class="btn green" id="go" style="margin-top:10px;">Empezar la aventura 🌍</button>
-  `,{sky:true});
-  document.querySelectorAll('.age-card').forEach(el=>{
-    el.onclick=()=>{ AudioX.pop(); State.ageBand = el.dataset.b; document.querySelectorAll('.age-card').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
-  });
-  document.getElementById('go').onclick=()=>{
-    if(!State.ageBand){ toast('¡Elegí tu edad primero!'); return; }
-    AudioX.click(); saveState(); renderMap();
-  };
-}
-function svgSprout(){return `<svg viewBox="0 0 80 80" width="60" height="60"><rect x="34" y="50" width="12" height="22" rx="4" fill="#7A5230"/><path d="M40 50 C 20 50 15 30 25 20 C 30 35 35 42 40 50 Z" fill="#3FBF7F"/><path d="M40 50 C 60 50 65 30 55 20 C 50 35 45 42 40 50 Z" fill="#6EE7A5"/></svg>`;}
-function svgTree(){return `<svg viewBox="0 0 80 80" width="60" height="60"><rect x="35" y="45" width="10" height="28" rx="3" fill="#7A5230"/><circle cx="40" cy="32" r="24" fill="#3FBF7F"/><circle cx="26" cy="40" r="14" fill="#2E9E68"/><circle cx="54" cy="40" r="14" fill="#2E9E68"/></svg>`;}
-function svgForest(){return `<svg viewBox="0 0 80 80" width="60" height="60"><rect x="12" y="50" width="8" height="22" fill="#7A5230"/><polygon points="16,15 30,50 2,50" fill="#279A5F"/><rect x="58" y="48" width="8" height="24" fill="#7A5230"/><polygon points="62,10 78,52 46,52" fill="#3FBF7F"/><rect x="36" y="55" width="8" height="18" fill="#7A5230"/><polygon points="40,28 52,58 28,58" fill="#6EE7A5"/></svg>`;}
-
-/* ============ PANTALLA 4: MAPA DE NIVELES ============ */
-function unlockedCount(){
-  let n=1;
-  for(let i=0;i<LEVELS.length;i++){ if(State.stars[LEVELS[i].id]>0) n=i+2; }
-  return Math.min(n, LEVELS.length);
-}
-function renderMap(){
-  const unlocked = unlockedCount();
-  const CH = 1500; // alto virtual del mapa (permite scroll)
-  const positions = [
-    {x:20,y:88},{x:62,y:76},{x:28,y:60},{x:70,y:46},{x:30,y:28},{x:60,y:10}
-  ]; // x en % del ancho, y en % del alto virtual CH
-  let nodes='';
-  LEVELS.forEach((lv,i)=>{
-    const locked = i>=unlocked;
-    const stars = State.stars[lv.id]||0;
-    nodes += `<div class="map-node ${locked?'locked':''}" style="left:calc(${positions[i].x}% - 41px);top:${positions[i].y*CH/100 - 41}px;background:${lv.color};"
-      data-id="${lv.id}"><span style="font-size:2em;">${lv.icon}</span>${stars>0?`<span class="star">${'⭐'.repeat(stars)}</span>`:''}
-      <span class="badge">${lv.name}</span></div>`;
-  });
-  show(`
-    <div id="mapscroll">
-      <div style="position:sticky;top:0;z-index:5;text-align:center;padding:6px 0 2px;pointer-events:none;">
-        <h2 style="margin:0;text-shadow:0 2px 6px rgba(0,0,0,.45);">Tu ruta circular 🌿</h2>
-        <div style="display:flex;justify-content:center;gap:8px;margin-top:5px;flex-wrap:wrap;">
-          <span class="pill" style="background:rgba(255,255,255,.9);font-size:.75rem;">${unlocked}/${LEVELS.length} destinos</span>
-          <span class="pill" style="background:rgba(255,255,255,.9);font-size:.75rem;">${Object.values(State.stars).reduce((a,b)=>a+b,0)} ⭐ conseguidas</span>
-        </div>
-      </div>
-      <div id="mapcanvas" style="height:${CH}px;">${nodes}</div>
-    </div>
-  `,{sky:true, hud:true, full:true});
-  // sendero: segmentos entre nodos consecutivos calculados en px reales
-  const canvas = document.getElementById('mapcanvas');
-  const cw = canvas.clientWidth;
-  for(let i=0;i<positions.length-1;i++){
-    const a = {x:positions[i].x/100*cw, y:positions[i].y*CH/100};
-    const b = {x:positions[i+1].x/100*cw, y:positions[i+1].y*CH/100};
-    const dx=b.x-a.x, dy=b.y-a.y, len=Math.sqrt(dx*dx+dy*dy), ang=Math.atan2(dy,dx)*180/Math.PI;
-    const seg=document.createElement('div');
-    seg.style.cssText=`position:absolute;left:${a.x}px;top:${a.y}px;width:${len}px;height:5px;
-      background:repeating-linear-gradient(90deg,#ffffffcc 0 9px, transparent 9px 17px);
-      transform-origin:0 50%;transform:rotate(${ang}deg);border-radius:3px;`;
-    canvas.appendChild(seg);
-  }
-  document.querySelectorAll('.map-node').forEach(el=>{
-    el.onclick=()=>{
-      if(el.classList.contains('locked')){ AudioX.wrong(); toast('Completá el nivel anterior 🔒'); return; }
-      AudioX.click(); startLevel(el.dataset.id);
-    };
-  });
-  // arranca centrado en el último nivel desbloqueado
-  requestAnimationFrame(()=>{
-    const ms = document.getElementById('mapscroll');
-    const targetY = positions[Math.min(unlocked-1,5)].y*CH/100;
-    ms.scrollTop = Math.max(0, targetY - ms.clientHeight*0.6);
-  });
-}
-
-/* ============ INICIO DE NIVEL: INTRO + MINIJUEGO ============ */
-const LEVEL_INTROS = {
-  l1: "El río Paraná está sufriendo y el dorado y el yacaré no pueden vivir tranquilos. ¡Separá lo que lo contamina de lo que no!",
-  l2: "En los Esteros del Iberá la basura se acumula entre camalotes y carpinchos. Ayudá a separar los residuos en su lugar correcto.",
-  l3: "En un taller de un pueblo correntino, muchos objetos rotos esperan una segunda vida. ¡Encontrá su nuevo uso!",
-  l4: "Una fábrica correntina convierte lo que unos descartan en el recurso de otros. ¡Armá el ciclo correcto!",
-  l5: "Cerca de la represa de Yacyretá, la región necesita energía limpia. Elegí las mejores fuentes para no agotar el planeta.",
-  l6: "El Consejo de Corrientes te pide tomar decisiones importantes para el futuro de su gente, sus ríos y sus esteros."
+/* ---------------- Avatares (SVG) ---------------- */
+const AVATARS={
+  carpincho:{n:'Carpincho',d:'Guía del Iberá',svg:`<svg viewBox="0 0 100 100"><ellipse cx="46" cy="64" rx="34" ry="24" fill="#A9773F"/><ellipse cx="46" cy="58" rx="30" ry="16" fill="#BE8B4E"/><circle cx="76" cy="48" r="19" fill="#B98847"/><ellipse cx="68" cy="34" rx="6" ry="5" fill="#8A6234"/><ellipse cx="84" cy="33" rx="6" ry="5" fill="#8A6234"/><circle cx="71" cy="45" r="2.6" fill="#2B1B0D"/><circle cx="85" cy="44" r="2.6" fill="#2B1B0D"/><ellipse cx="90" cy="53" rx="6" ry="4.5" fill="#6E4A24"/><circle cx="88" cy="52" r="1.3" fill="#2B1B0D"/><circle cx="92" cy="52" r="1.3" fill="#2B1B0D"/><path d="M20 82q6 6 14 4" stroke="#8A6234" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`},
+  yacare:{n:'Yacaré',d:'Vigía del Paraná',svg:`<svg viewBox="0 0 100 100"><ellipse cx="54" cy="64" rx="36" ry="15" fill="#4F8F5E"/><path d="M18 64q-14-4-16 5 8 6 18 3z" fill="#3F7A4C"/><path d="M26 52h10l-3 7h-10zM42 50h11l-3 7H39zM60 51h10l-3 7H57zM76 54h8l-2 6h-8z" fill="#3A6F45"/><ellipse cx="36" cy="58" rx="6" ry="5" fill="#5FA36E"/><circle cx="36" cy="57" r="3.2" fill="#F2C744"/><circle cx="36" cy="57" r="1.4" fill="#12302A"/><ellipse cx="52" cy="57" rx="6" ry="5" fill="#5FA36E"/><circle cx="52" cy="56" r="3.2" fill="#F2C744"/><circle cx="52" cy="56" r="1.4" fill="#12302A"/><path d="M70 70h20v4H70z" fill="#3F7A4C"/></svg>`},
+  aguara:{n:'Aguará guazú',d:'Zorro de crin',svg:`<svg viewBox="0 0 100 100"><ellipse cx="50" cy="66" rx="26" ry="20" fill="#E08A43"/><path d="M50 30l-16 22h32z" fill="#D9743A"/><path d="M34 30l-8-18 16 10zM66 30l8-18-16 10z" fill="#C2622E"/><circle cx="50" cy="44" r="18" fill="#E89B55"/><path d="M36 38l-6-16 14 8zM64 38l6-16-14 8z" fill="#1F1B18"/><circle cx="43" cy="44" r="2.8" fill="#26160C"/><circle cx="57" cy="44" r="2.8" fill="#26160C"/><ellipse cx="50" cy="52" rx="4.5" ry="3.4" fill="#1F1208"/><path d="M50 55v5" stroke="#1F1208" stroke-width="2"/><path d="M24 78q-10 6-6 14 10-2 12-10z" fill="#1F1B18"/></svg>`},
+  surubi:{n:'Surubí',d:'Rey del río',svg:`<svg viewBox="0 0 100 100"><path d="M12 50q24-22 56-16 18 4 22 16-4 12-22 16-32 6-56-16z" fill="#7E8C93"/><path d="M12 50q24-22 56-16 18 4 22 16z" fill="#98A6AD"/><path d="M6 34l14 14-14 14q-4-14 0-28z" fill="#6C797F"/><circle cx="24" cy="38" r="3" fill="#2A3338"/><circle cx="38" cy="36" r="3" fill="#2A3338"/><circle cx="52" cy="38" r="3" fill="#2A3338"/><circle cx="66" cy="40" r="3" fill="#2A3338"/><circle cx="46" cy="52" r="3" fill="#2A3338"/><circle cx="62" cy="54" r="3" fill="#2A3338"/><circle cx="82" cy="47" r="2.6" fill="#16201F"/><path d="M84 54q-8 2-12-2" stroke="#4E5A60" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`},
+  ceibo:{n:'Ceibo',d:'Espíritu del monte',svg:`<svg viewBox="0 0 100 100"><rect x="44" y="52" width="12" height="34" rx="4" fill="#7A5230"/><path d="M50 60q-14-2-20-12M50 66q14-2 20-12" stroke="#7A5230" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="34" cy="40" r="13" fill="#2E9E68"/><circle cx="66" cy="40" r="13" fill="#2E9E68"/><circle cx="50" cy="30" r="15" fill="#3FBF7F"/><circle cx="38" cy="30" r="5" fill="#E04A4A"/><circle cx="62" cy="34" r="5" fill="#E04A4A"/><circle cx="50" cy="20" r="5" fill="#E04A4A"/><circle cx="28" cy="44" r="4.4" fill="#E04A4A"/><circle cx="70" cy="46" r="4.4" fill="#E04A4A"/></svg>`},
+  ciervo:{n:'Ciervo',d:'De los pantanos',svg:`<svg viewBox="0 0 100 100"><ellipse cx="44" cy="66" rx="26" ry="17" fill="#B07C46"/><rect x="62" y="44" width="10" height="22" rx="5" fill="#B07C46"/><ellipse cx="70" cy="40" rx="13" ry="10" fill="#C08C52"/><path d="M62 32l-4-14 8 8zM78 32l6-14-10 8zM60 26l-8-8M80 26l8-8" stroke="#6B4A24" stroke-width="3.4" fill="none" stroke-linecap="round"/><circle cx="66" cy="39" r="2.4" fill="#2B1B0D"/><circle cx="76" cy="39" r="2.4" fill="#2B1B0D"/><ellipse cx="81" cy="44" rx="4" ry="3" fill="#6B4A24"/><path d="M26 80v8M40 82v8M52 80v8" stroke="#8A6234" stroke-width="5" stroke-linecap="round"/></svg>`}
 };
-function startLevel(id){
-  State.currentLevel = id;
-  const lv = LEVELS.find(l=>l.id===id);
-  show(`
-    <div class="cine-sun" style="width:50px;height:50px;top:10%;"></div>
-    <div class="cine-wave" style="height:50px;opacity:.6;"></div>
-    <div class="card" style="position:relative;z-index:2;">
-      <div style="font-size:3.4em;animation:bob 3s ease-in-out infinite;">${lv.icon}</div>
-      <h2>${lv.name}</h2>
-      <div style="display:inline-flex;align-items:center;gap:8px;background:#eef8f4;border:1px solid #d6eee4;color:#276b51;border-radius:999px;padding:7px 11px;font-size:.78rem;font-weight:800;margin:4px 0 12px;">${lv.theme}</div>
-       <p class="sub" style="color:var(--ink);text-shadow:none;margin-bottom:16px;">${LEVEL_INTROS[id]}</p>
-      <button class="btn green" id="playbtn">¡A jugar! 🚀</button>
+
+/* ---------------- Progresión ---------------- */
+function totalStars(){ return Object.values(S.levels).reduce((a,l)=>a+(l.stars||0),0); }
+function lvState(id){ return S.levels[id]||{stars:0,best:0,done:false}; }
+function isUnlocked(i){ if(S.settings.aula) return true; if(i===0) return true;
+  return !!(S.levels[LEVELS[i-1].id]||{}).done; }
+function addXP(n){ S.xp+=n; save(); }
+function grantBadge(id){ if(!S.badges.includes(id)){ S.badges.push(id); save();
+  const b=BADGES.find(b=>b.id===id); if(b){ setTimeout(()=>toast(`🏅 Insignia desbloqueada: <b>${b.n}</b>`,2600),700); } } }
+
+/* ---------------- Pantalla: Inicio ---------------- */
+function renderHome(){
+  const started=totalStars()>0||S.name;
+  const prog=Math.round(Object.values(S.levels).filter(l=>l.done).length/LEVELS.length*100);
+  screen(`<div class="wrap narrow center" style="padding-top:26px;">
+    <div class="stagger" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:0;">
+      <div style="animation:float 5s ease-in-out infinite;margin-bottom:6px;">${logoSVG()}</div>
+      <div class="eyebrow" style="margin-bottom:6px;">Provincia de Corrientes · Educación ambiental</div>
+      <h1 class="display" style="font-size:2.35rem;text-align:center;line-height:1.05;">EcoCiclo<br><span style="color:var(--sun)">La Ruta Circular</span></h1>
+      <p class="lead" style="text-align:center;max-width:460px;margin:12px 0 18px;">
+        Ocho misiones por el territorio correntino para aprender a diseñar un mundo <b>sin residuos</b>:
+        del Paraná a los Esteros, de la citrícola de Bella Vista al Consejo Provincial.</p>
+      ${started?`<div class="panel tight" style="width:100%;max-width:430px;margin-bottom:14px;text-align:left;">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:7px;">
+          <span>${S.name?'Hola, <b>'+esc(S.name)+'</b>':'Progreso'}</span><span class="muted">${prog}% · ⭐${totalStars()}</span></div>
+        <div class="bar"><i style="width:${prog}%"></i></div></div>`:''}
+      <button class="btn green block" style="max-width:340px" id="play">${started?'▶ Continuar la ruta':'▶ Comenzar aventura'}</button>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:12px;">
+        <button class="btn ghost sm" data-go="glos">📖 Glosario circular</button>
+        <button class="btn ghost sm" data-go="badges">🏅 Logros</button>
+        <button class="btn ghost sm" data-go="docente">🎓 Modo aula</button>
+      </div>
+      <div class="divider" style="width:100%;max-width:430px;"></div>
+      <div class="scroll-x" style="max-width:100%;">
+        <span class="chip blue">💧 Ciclo biológico y técnico</span>
+        <span class="chip green">♻️ Escalera de las 10R</span>
+        <span class="chip gold">🏭 Simbiosis industrial</span>
+        <span class="chip">🧪 Ecodiseño</span>
+        <span class="chip">🏛️ Políticas públicas</span>
+      </div>
+      <p class="muted" style="font-size:.7rem;margin-top:16px;max-width:420px;">Recurso didáctico para nivel primario superior y secundario. Funciona sin conexión una vez cargado.</p>
+    </div></div>`,{bar:false});
+  document.getElementById('play').onclick=()=>{Snd.tap(); (S.band?renderMap:renderSetup)();};
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
+}
+function logoSVG(){ return `<svg width="118" height="118" viewBox="0 0 120 120">
+  <defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6FD79E"/><stop offset="1" stop-color="#1F7FC2"/></linearGradient></defs>
+  <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+  <path d="M60 20 A40 40 0 0 1 95 78" fill="none" stroke="url(#lg1)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M95 78 l-3-16 l16 5 z" fill="#1F7FC2"/>
+  <path d="M60 100 A40 40 0 0 1 25 42" fill="none" stroke="#F2B544" stroke-width="9" stroke-linecap="round"/>
+  <path d="M25 42 l3 16 l-16-5 z" fill="#F2B544"/>
+  <path d="M60 46c-10 0-16 7-16 14 0 8 7 14 16 14s16-6 16-14c0-7-6-14-16-14z" fill="#2FA36B" opacity=".9"/>
+  <path d="M60 74V46M52 56l8 6 8-6" stroke="#06212B" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>`; }
+
+/* ---------------- Pantalla: Configuración inicial ---------------- */
+function renderSetup(){
+  screen(`<div class="wrap narrow">
+    <div class="eyebrow">Paso 1 de 2</div>
+    <h2 class="display" style="font-size:1.5rem;margin:6px 0 4px;">Armá tu identidad correntina</h2>
+    <p class="muted" style="font-size:.86rem;margin:0 0 16px;">Elegí tu guía. Te va a acompañar en las ocho misiones.</p>
+    <div class="avatars" id="avs">
+      ${Object.entries(AVATARS).map(([k,v])=>`<div class="av ${S.avatar===k?'sel':''}" data-av="${k}">${v.svg}<b>${v.n}</b><small>${v.d}</small></div>`).join('')}
     </div>
-  `,{sky:true, hud:true});
-  document.getElementById('playbtn').onclick=()=>{ AudioX.click(); runMinigame(id); };
+    <div class="divider"></div>
+    <label style="font-size:.86rem;font-weight:600;display:block;margin-bottom:7px;">Tu nombre (opcional, aparece en el certificado)</label>
+    <input type="text" id="nm" maxlength="28" placeholder="Ej.: Sofía Aguirre" value="${esc(S.name)}">
+    <div class="divider"></div>
+    <div class="eyebrow">Paso 2 de 2 · Nivel</div>
+    <p class="muted" style="font-size:.86rem;margin:6px 0 12px;">Ajusta la cantidad de rondas, el tiempo y la profundidad de los textos.</p>
+    <div class="optgrid" id="bands">
+      ${[['exp','Explorador/a','9 a 11 años · sin reloj, textos breves','🌱'],
+         ['inv','Investigador/a','12 a 14 años · reloj suave, vocabulario técnico','🌿'],
+         ['est','Estratega','15 años en adelante · reloj exigente, casos reales','🌳']]
+        .map(([k,t,d,e])=>`<button class="opt ${S.band===k?'sel':''}" data-band="${k}"><span class="k">${e}</span><span><b>${t}</b><br><span class="muted" style="font-size:.8rem">${d}</span></span></button>`).join('')}
+    </div>
+    <button class="btn green block" id="ok" style="margin-top:18px" ${S.band?'':'disabled'}>Ir al mapa →</button>
+  </div>`,{title:'Preparativos',hideStats:true});
+  document.querySelectorAll('[data-av]').forEach(e=>e.onclick=()=>{Snd.tap();S.avatar=e.dataset.av;
+    document.querySelectorAll('.av').forEach(x=>x.classList.remove('sel'));e.classList.add('sel');});
+  document.querySelectorAll('[data-band]').forEach(e=>e.onclick=()=>{Snd.tap();S.band=e.dataset.band;
+    document.querySelectorAll('[data-band]').forEach(x=>x.classList.remove('sel'));e.classList.add('sel');
+    document.getElementById('ok').disabled=false;});
+  document.getElementById('ok').onclick=()=>{ S.name=document.getElementById('nm').value.trim(); save(); Snd.good(); renderMap(); };
 }
 
-function finishLevel(id, success, starsEarned){
-  if(success){
-    State.stars[id] = Math.max(State.stars[id]||0, starsEarned);
-    State.drops += starsEarned*10;
-    saveState();
-    AudioX.win(); confettiBurst();
-    show(`
-      <div class="card">
-        <div style="font-size:3em;">${'⭐'.repeat(starsEarned)}${'☆'.repeat(3-starsEarned)}</div>
-        <h2>¡Muy bien hecho!</h2>
-        <p class="sub" style="color:var(--ink);text-shadow:none;">Ganaste <b>${starsEarned*10} gotas 💧</b> por tu esfuerzo circular.</p>
-         <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px 0;">
-           <span class="pill">⭐ ${starsEarned}/3 estrellas</span>
-           <span class="pill">💧 +${starsEarned*10} gotas</span>
-         </div>
-        <div class="rowbtns">
-          <button class="btn blue" id="tomap">Mapa 🗺️</button>
-          <button class="btn green" id="retry">Repetir 🔁</button>
-        </div>
-      </div>
-    `,{sky:true, hud:true});
-  } else {
-    AudioX.wrong();
-    show(`
-      <div class="card">
-        <div style="font-size:3em;">🌱</div>
-        <h2>¡Casi lo lográs!</h2>
-        <p class="sub">El planeta necesita un poco más de tu ayuda. ¿Lo intentamos otra vez?</p>
-        <div class="rowbtns">
-          <button class="btn blue" id="tomap">Mapa 🗺️</button>
-          <button class="btn green" id="retry">Intentar de nuevo 🔁</button>
-        </div>
-      </div>
-    `,{sky:true, hud:true});
-  }
-  document.getElementById('tomap').onclick=()=>{ AudioX.click(); renderMap(); };
-  document.getElementById('retry').onclick=()=>{ AudioX.click(); startLevel(id); };
+/* ---------------- Menú ---------------- */
+function menuModal(){
+  const sw=(k,l,d)=>`<div class="switch"><div><b>${l}</b><br><span class="muted" style="font-size:.76rem">${d}</span></div>
+    <div class="sw ${S.settings[k]?'on':''}" data-sw="${k}"><i></i></div></div>`;
+  modal(`<h3 class="display" style="font-size:1.2rem;margin-bottom:12px;">Opciones</h3>
+    ${sw('sound','Sonido','Efectos y música de aciertos')}
+    ${sw('timer','Reloj','Desactivalo para trabajar sin presión')}
+    ${sw('dys','Lectura accesible','Mayor interlineado y espaciado')}
+    ${sw('aula','Modo aula','Desbloquea las 8 misiones para usar en clase')}
+    <div class="divider"></div>
+    <div style="display:grid;gap:8px;">
+      <button class="btn ghost sm" data-m="glos">📖 Glosario</button>
+      <button class="btn ghost sm" data-m="badges">🏅 Logros y estadísticas</button>
+      <button class="btn ghost sm" data-m="docente">🎓 Guía docente</button>
+      <button class="btn ghost sm" data-m="reset" style="color:#FFB4B4">🗑 Reiniciar progreso</button>
+      <button class="btn sm" id="cls">Cerrar</button>
+    </div>`);
+  document.querySelectorAll('[data-sw]').forEach(e=>e.onclick=()=>{ const k=e.dataset.sw; S.settings[k]=!S.settings[k];
+    e.classList.toggle('on'); document.body.classList.toggle('dys',S.settings.dys); save(); Snd.tap();
+    if(k==='aula') toast(S.settings.aula?'Modo aula activado: todas las misiones disponibles':'Modo aula desactivado'); });
+  document.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{ const m=e.dataset.m; Snd.tap();
+    if(m==='reset'){ if(confirm('¿Borrar todo el progreso guardado?')){ S=JSON.parse(JSON.stringify(DEFAULT)); save(); closeModal(); renderHome(); } return; }
+    closeModal(); go(m); });
+  document.getElementById('cls').onclick=()=>{Snd.tap();closeModal(); const t=document.querySelector('#topbar .stat'); if(t) renderRefresh();};
 }
-
-/* ============ MOTOR DE MINIJUEGOS ============ */
-function runMinigame(id){
-  const diff = difficultyFor(State.ageBand);
-  if(id==='l1') gameSortRiver(diff, id);
-  else if(id==='l2') gameSortTrash(diff, id);
-  else if(id==='l3') gameMatchRepair(diff, id);
-  else if(id==='l4') gameCycleChain(diff, id);
-  else if(id==='l5') gameEnergyPick(diff, id);
-  else gameFinalQuiz(diff, id);
-}
-
-/* ---- Utilidad: temporizador visual ---- */
-function attachTimer(container, seconds, onEnd){
-  if(seconds>900) return {stop(){}, el:null}; // sin límite (modo 6-8)
-  const wrap=document.createElement('div');
-  wrap.style.cssText='position:absolute;top:70px;left:50%;transform:translateX(-50%);z-index:10;';
-  wrap.innerHTML = `<div class="timerbar"><div id="tfill"></div></div>`;
-  container.appendChild(wrap);
-  let t=seconds, total=seconds;
-  const fill = wrap.querySelector('#tfill');
-  const iv = setInterval(()=>{
-    t-=0.1;
-    fill.style.width = Math.max(0,(t/total*100))+'%';
-    if(t<=3 && t>0) AudioX.tick();
-    if(t<=0){ clearInterval(iv); onEnd(); }
-  },100);
-  const handle = { stop(){ clearInterval(iv); } };
-  activeTimer = handle;
-  return handle;
-}
-
-/* ---- MINIJUEGO 1: Río — arrastrar objetos a "Contamina" o "Río limpio" ---- */
-function gameSortRiver(diff, id){
-  const pool = [
-    {n:'Botella plástica',e:'🧴',bad:true},{n:'Aceite usado',e:'🛢️',bad:true},{n:'Pila',e:'🔋',bad:true},
-    {n:'Hoja de árbol',e:'🍃',bad:false},{n:'Pez',e:'🐟',bad:false},{n:'Piedra',e:'🪨',bad:false},
-    {n:'Bolsa',e:'🛍️',bad:true},{n:'Jabón en exceso',e:'🧼',bad:true},{n:'Flor',e:'🌸',bad:false},
-    {n:'Colilla de cigarro',e:'🚬',bad:true}
-  ];
-  const items = shuffle(pool).slice(0, diff.items);
-  let idx=0, correct=0, lives=diff.lives;
-  const html = `
-    <div id="minigame-area">
-      <div style="text-align:center;padding-top:8px;"><h2>Salvá al Paraná 💧</h2></div>
-      <div style="display:flex;justify-content:space-around;margin-top:10px;padding:0 6%;">
-        <div class="dropzone" id="zone-bad" style="width:44%;height:170px;">🚯<br>Contamina</div>
-        <div class="dropzone" id="zone-good" style="width:44%;height:170px;">🐊<br>Río sano</div>
-      </div>
-      <div id="itemhost" style="display:flex;justify-content:center;margin-top:24px;"></div>
-      <div style="text-align:center;margin-top:10px;color:#04304a;font-weight:bold;">Vidas: <span id="lives">${'💙'.repeat(lives)}</span></div>
-    </div>`;
-  show(html,{sky:true, hud:true});
-  const area = document.getElementById('scr');
-  attachTimer(area, diff.time, ()=> finishLevel(id, correct>=Math.ceil(items.length*0.6), starsFrom(correct,items.length)));
-  nextItem();
-  function nextItem(){
-    if(idx>=items.length){ finishLevel(id, correct>=Math.ceil(items.length*0.6), starsFrom(correct,items.length)); return; }
-    const it = items[idx];
-    document.getElementById('itemhost').innerHTML = `<div class="draggable" id="curitem" style="font-size:3.4em;background:#fff;border-radius:20px;padding:14px 22px;box-shadow:0 6px 14px rgba(0,0,0,.2);">${it.e}<div style="font-size:.28em;font-weight:bold;color:#333;">${it.n}</div></div>`;
-    makeDraggable(document.getElementById('curitem'), (zoneId)=>{
-      const chose = zoneId==='zone-bad';
-      if(chose===it.bad){ correct++; AudioX.correct(); }
-      else { lives--; AudioX.wrong(); document.getElementById('lives').textContent='💙'.repeat(Math.max(lives,0)); if(lives<=0){ finishLevel(id,false,0); return; } }
-      idx++; nextItem();
-    }, ['zone-bad','zone-good']);
+function renderRefresh(){ /* refresca contadores del topbar sin cambiar de pantalla */
+  const bar=document.getElementById('topbar'); if(!bar) return;
+  const stats=bar.querySelectorAll('.stat'); if(stats.length>=2){
+    stats[0].innerHTML=`⭐ <span>${totalStars()}</span><small>/${LEVELS.length*3}</small>`;
+    stats[1].innerHTML=`🌱 <span>${S.xp}</span>`;
   }
 }
 
-/* ---- MINIJUEGO 2: Separar residuos en contenedores (papel/plástico/vidrio/orgánico) ---- */
-function gameSortTrash(diff, id){
-  const cats = [
-    {k:'papel', label:'Papel', color:'#4C8CFF', e:'📦'},
-    {k:'plastico', label:'Plástico', color:'#FFC93C', e:'🧴'},
-    {k:'vidrio', label:'Vidrio', color:'#3FBF7F', e:'🍾'},
-    {k:'organico', label:'Orgánico', color:'#7A5230', e:'🍂'},
-  ];
-  const usedCats = diff.items<=4 ? cats.slice(0,3) : cats;
-  const items = [
-    {n:'Diario',e:'📰',k:'papel'},{n:'Botella',e:'🍾',k:'vidrio'},{n:'Cáscara de banana',e:'🍌',k:'organico'},
-    {n:'Envase',e:'🧴',k:'plastico'},{n:'Caja',e:'📦',k:'papel'},{n:'Frasco',e:'🫙',k:'vidrio'},
-    {n:'Cáscara de huevo',e:'🥚',k:'organico'},{n:'Bolsa',e:'🛍️',k:'plastico'},
-  ].filter(i=>usedCats.some(c=>c.k===i.k));
-  const chosen = shuffle(items).slice(0, diff.items);
-  let idx=0, correct=0, lives=diff.lives;
-  show(`
-    <div id="minigame-area">
-      <div style="text-align:center;padding-top:8px;"><h2>Limpiemos el Iberá 🌿</h2><p class="sub" style="margin:0;">Tocá el contenedor correcto para cada residuo.</p></div>
-      <div id="itemhost" style="display:flex;justify-content:center;margin-top:20px;"></div>
-      <div id="btnhost" style="display:flex;justify-content:center;gap:2%;margin-top:26px;padding:0 4%;flex-wrap:wrap;"></div>
-      <div style="text-align:center;margin-top:14px;color:#04304a;font-weight:bold;">Vidas: <span id="lives">${'💙'.repeat(lives)}</span></div>
-    </div>`,{sky:true, hud:true});
-  const area = document.getElementById('scr');
-  attachTimer(area, diff.time, ()=> finishLevel(id, correct>=Math.ceil(chosen.length*0.6), starsFrom(correct,chosen.length)));
-  nextItem();
-  function nextItem(){
-    if(idx>=chosen.length){ finishLevel(id, correct>=Math.ceil(chosen.length*0.6), starsFrom(correct,chosen.length)); return; }
-    const it = chosen[idx];
-    document.getElementById('itemhost').innerHTML = `<div style="font-size:3.4em;background:#fff;border-radius:20px;padding:14px 22px;box-shadow:0 6px 14px rgba(0,0,0,.2);text-align:center;">${it.e}<div style="font-size:.28em;font-weight:bold;color:#333;">${it.n}</div></div>`;
-    document.getElementById('btnhost').innerHTML = shuffle(usedCats).map(c=>`<button class="binbtn" data-k="${c.k}" style="width:${90/usedCats.length}%;min-width:70px;background:${c.color}33;border:3px solid ${c.color};border-radius:16px;padding:10px 4px;font-weight:bold;color:#222;font-size:.9em;">${c.e}<br>${c.label}</button>`).join('');
-    document.querySelectorAll('.binbtn').forEach(b=>{
-      b.onclick=()=>{
-        AudioX.drop();
-        if(b.dataset.k===it.k){ correct++; AudioX.correct(); }
-        else { lives--; AudioX.wrong(); document.getElementById('lives').textContent='💙'.repeat(Math.max(lives,0)); if(lives<=0){ finishLevel(id,false,0); return; } }
-        idx++; nextItem();
-      };
-    });
-  }
-}
-
-/* ---- MINIJUEGO 3: Emparejar objeto roto con su nuevo uso (memoria/match) ---- */
-function gameMatchRepair(diff, id){
-  const pairsAll = [
-    {a:'👖 Jean roto', b:'👜 Bolso', k:1},
-    {a:'🥫 Lata', b:'🖊️ Portalápices', k:2},
-    {a:'🛞 Neumático', b:'🌸 Maceta', k:3},
-    {a:'🍾 Botella', b:'💡 Lámpara', k:4},
-    {a:'📦 Caja', b:'🏠 Casa de juguete', k:5},
-    {a:'👕 Remera vieja', b:'🧵 Trapo de piso', k:6},
-  ];
-  const nPairs = diff.items<=4?3:(diff.items<=6?4:5);
-  const chosen = shuffle(pairsAll).slice(0,nPairs);
-  let cards = [];
-  chosen.forEach(p=>{ cards.push({txt:p.a,k:p.k}); cards.push({txt:p.b,k:p.k}); });
-  cards = shuffle(cards);
-  let flipped = [], matched = 0, moves=0;
-  const grid = cards.map((c,i)=>`
-    <div class="matchcard" data-i="${i}" data-k="${c.k}" style="width:${diff.items<=4?'42%':'30%'};aspect-ratio:1/0.7;background:linear-gradient(180deg,#8E6FE0,#6C4FC9);
-      border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:1em;
-      box-shadow:0 5px 10px rgba(0,0,0,.2);cursor:pointer;text-align:center;padding:6px;">?</div>
-  `).join('');
-  show(`
-    <div id="minigame-area" style="overflow-y:auto;">
-      <div style="text-align:center;padding-top:8px;"><h2>Segunda vida ♻️</h2><p class="sub" style="margin:0 0 8px;">Encontrá cada par: objeto y su nuevo uso.</p></div>
-      <div id="grid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:0 6% 20px;">${grid}</div>
-    </div>`,{sky:true, hud:true});
-  const area = document.getElementById('scr');
-  attachTimer(area, diff.time+nPairs*4, ()=> finishLevel(id, matched>=Math.ceil(nPairs*0.6), starsFrom(matched,nPairs)));
-  document.querySelectorAll('.matchcard').forEach(el=>{
-    el.onclick=()=>{
-      if(el.dataset.flip || flipped.length>=2) return;
-      AudioX.pop();
-      el.dataset.flip='1';
-      el.textContent = cards[+el.dataset.i].txt;
-      el.style.background='linear-gradient(180deg,#FFC93C,#FFB300)'; el.style.color='#5A3A00';
-      flipped.push(el);
-      if(flipped.length===2){
-        moves++;
-        setTimeout(()=>{
-          if(flipped[0].dataset.k===flipped[1].dataset.k){
-            AudioX.correct(); matched++;
-            flipped.forEach(f=>{ f.style.background='linear-gradient(180deg,#6EE7A5,#3FBF7F)'; f.style.color='#0B3A22'; });
-            flipped=[];
-            if(matched>=nPairs) finishLevel(id, true, starsFrom(nPairs - Math.max(0,moves-nPairs), nPairs, true));
-          } else {
-            AudioX.wrong();
-            flipped.forEach(f=>{ f.dataset.flip=''; f.textContent='?'; f.style.background='linear-gradient(180deg,#8E6FE0,#6C4FC9)'; f.style.color='#fff'; });
-            flipped=[];
-          }
-        },550);
-      }
-    };
+/* ---------------- Mapa ---------------- */
+function renderMap(){
+  const doneN=Object.values(S.levels).filter(l=>l.done).length;
+  const nextI=LEVELS.findIndex((l,i)=>!lvState(l.id).done && isUnlocked(i));
+  const nodes=LEVELS.map((l,i)=>{
+    const st=lvState(l.id), un=isUnlocked(i);
+    const cls=st.done?'done':(i===nextI?'next':(un?'':'locked'));
+    return `<div class="node ${un?'':'locked'} ${cls}" style="left:${l.x}%;top:${l.y}%" data-lv="${l.id}">
+      <div class="disc">${un?l.icon:'🔒'}<span class="num">${i+1}</span>
+      ${st.stars?`<span class="st">${'★'.repeat(st.stars)}</span>`:''}</div>
+      <div class="nm">${l.place}</div></div>`;
+  }).join('');
+  const pts=LEVELS.map(l=>`${l.x},${(l.y*1.35).toFixed(1)}`).join(' ');
+  screen(`<div class="wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+      <div><div class="eyebrow">Ruta circular</div>
+        <h2 class="display" style="font-size:1.35rem;">Corrientes, tu territorio</h2></div>
+      <div style="min-width:150px;flex:1;max-width:230px;">
+        <div class="bar gold"><i style="width:${doneN/LEVELS.length*100}%"></i></div>
+        <div class="muted" style="font-size:.72rem;margin-top:5px;">${doneN} de ${LEVELS.length} misiones completadas</div></div>
+    </div>
+    <div id="mapHost">
+      <svg class="terrain" viewBox="0 0 100 135" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="rio" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E90D6"/><stop offset="1" stop-color="#15587F"/></linearGradient>
+          <linearGradient id="land" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C4E42"/><stop offset="1" stop-color="#123A36"/></linearGradient>
+        </defs>
+        <path d="M8 14 Q30 6 52 12 Q76 18 92 34 Q96 60 88 92 Q74 122 46 128 Q20 124 10 98 Q4 56 8 14 Z" fill="url(#land)" stroke="rgba(255,255,255,.14)" stroke-width=".6"/>
+        <path d="M8 18 Q20 34 16 54 Q12 78 24 100 Q36 118 46 127" fill="none" stroke="url(#rio)" stroke-width="5" stroke-linecap="round" opacity=".92"/>
+        <path d="M92 36 Q80 58 72 82 Q62 106 46 127" fill="none" stroke="url(#rio)" stroke-width="4" stroke-linecap="round" opacity=".75"/>
+        <ellipse cx="54" cy="52" rx="20" ry="13" fill="#1F7A5E" opacity=".55"/>
+        <ellipse cx="54" cy="52" rx="13" ry="8" fill="#2E90D6" opacity=".35"/>
+        <text x="54" y="53" font-size="3.4" fill="#BFE9DA" text-anchor="middle" opacity=".8" font-family="Outfit">ESTEROS DEL IBERÁ</text>
+        <text x="14" y="70" font-size="3" fill="#9CD7F5" text-anchor="middle" opacity=".75" transform="rotate(-78 14 70)" font-family="Outfit">RÍO PARANÁ</text>
+        <text x="84" y="70" font-size="2.7" fill="#9CD7F5" text-anchor="middle" opacity=".65" transform="rotate(72 84 70)" font-family="Outfit">RÍO URUGUAY</text>
+        <polyline points="${pts}" fill="none" stroke="rgba(255,255,255,.28)" stroke-width=".9" stroke-dasharray="2 2.4"/>
+      </svg>
+      ${nodes}
+    </div>
+    <div class="panel tight" style="margin-top:14px;display:flex;gap:11px;align-items:center;">
+      <div style="width:44px;flex:0 0 auto;">${AVATARS[S.avatar].svg}</div>
+      <div style="font-size:.84rem;line-height:1.45;">${mapHint(nextI)}</div>
+    </div>
+    ${doneN===LEVELS.length?`<button class="btn block" style="margin-top:12px" data-go="final">🏆 Desafío final y certificado</button>`:''}
+  </div>`,{title:'Mapa de misiones'});
+  document.querySelectorAll('[data-lv]').forEach(n=>n.onclick=()=>{
+    const i=LEVELS.findIndex(l=>l.id===n.dataset.lv);
+    if(!isUnlocked(i)){ Snd.bad(); toast('🔒 Completá la misión anterior para desbloquearla'); return; }
+    Snd.tap(); renderBriefing(LEVELS[i]);
   });
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
+}
+function mapHint(nextI){
+  if(nextI<0) return `<b>¡Completaste la ruta!</b> Ahora rendí el desafío final para obtener tu certificado de Agente Circular.`;
+  const l=LEVELS[nextI];
+  return `<b>Próxima parada: ${l.place}.</b> ${l.hint}`;
+}
+</script>
+<script>
+/* =========================================================
+   DATOS DE LAS 8 MISIONES
+   ========================================================= */
+const LEVELS=[
+ {id:'m1',icon:'💧',place:'Paso de la Patria',name:'Los dos ciclos del Paraná',game:'ciclos',
+  concept:'Ciclo biológico vs. ciclo técnico',
+  hint:'En la costa del Paraná vas a aprender a separar lo que vuelve a la tierra de lo que vuelve a la industria.',
+  brief:'La economía circular tiene <b>dos circuitos</b> que nunca deben mezclarse. Los materiales <b>biológicos</b> (restos de comida, madera, algodón) vuelven al suelo como nutrientes. Los materiales <b>técnicos</b> (metales, plásticos, vidrio, electrónica) nunca se degradan sin dañar: deben volver a la industria una y otra vez. Cuando se mezclan, los dos se arruinan.',
+  goal:'Clasificá cada material en el ciclo que le corresponde.',
+  data:'El Paraná arrastra millones de microplásticos por año. Un estudio de la UNNE detectó microplásticos en peces del tramo correntino: el plástico del ciclo técnico terminó dentro del ciclo biológico.'},
+
+ {id:'m2',icon:'🔧',place:'Corrientes Capital',name:'El taller de las 10R',game:'escalera',
+  concept:'Jerarquía de estrategias circulares',
+  hint:'En un taller del barrio Cambá Cuá vas a decidir cuál de las 10R conviene aplicar en cada caso.',
+  brief:'No todas las soluciones valen lo mismo. La <b>escalera de las 10R</b> las ordena de mejor a peor: Rechazar, Repensar, Reducir, Reutilizar, Reparar, Restaurar, Refabricar, Reconvertir, Reciclar y Recuperar energía. Reciclar está casi al final: es mejor no generar el residuo que tener que procesarlo.',
+  goal:'Elegí la estrategia MÁS ALTA de la escalera que resuelva cada situación.',
+  data:'Reciclar una botella PET consume cerca del 60% menos energía que fabricarla nueva; pero rellenar una botella retornable consume casi un 90% menos. Subir un escalón siempre ahorra más.'},
+
+ {id:'m3',icon:'🍊',place:'Bella Vista',name:'Cascada de valor citrícola',game:'cascada',
+  concept:'Valorización en cascada de subproductos',
+  hint:'En la capital nacional del citrus, nada del descarte de naranja debería terminar enterrado.',
+  brief:'Cuando sobra un material, hay muchos destinos posibles. La <b>cascada de valor</b> dice: usalo primero en su aplicación de mayor valor, y solo cuando ya no se pueda, bajá al siguiente escalón. Alimento humano › alimento animal › ingredientes y bioproductos › compost › energía › relleno.',
+  goal:'Elegí el destino de MAYOR valor posible para cada subproducto.',
+  data:'Bella Vista y Mburucuyá concentran buena parte de la producción citrícola correntina. De cada naranja industrializada, más de la mitad del peso es cáscara, semilla y bagazo: aceites esenciales, pectina y alimento animal salen de allí.'},
+
+ {id:'m4',icon:'🏭',place:'Goya',name:'La mesa de ecodiseño',game:'ecodiseno',
+  concept:'Ecodiseño y modelos de negocio circulares',
+  hint:'Vas a diseñar desde cero un producto que dure, se repare y vuelva a la industria.',
+  brief:'El <b>80% del impacto ambiental de un producto se define en la etapa de diseño</b>. Materiales, forma de unir las piezas, repuestos y modelo de negocio deciden si el producto vivirá 20 años o irá al basural en 2.',
+  goal:'Tomá 5 decisiones de diseño para una heladerita térmica correntina. Buscá el mejor equilibrio.',
+  data:'La obsolescencia programada acorta la vida útil a propósito. La Unión Europea ya obliga a que celulares y electrodomésticos tengan repuestos disponibles y batería reemplazable.'},
+
+ {id:'m5',icon:'🌾',place:'Colonia Carlos Pellegrini',name:'El corazón del Iberá',game:'compost',
+  concept:'Ciclo biológico: compostaje y nutrientes',
+  hint:'Los Esteros son un ecosistema frágil: acá se aprende a devolver nutrientes al suelo sin contaminar.',
+  brief:'El compostaje es el ciclo biológico funcionando. Necesita equilibrio entre <b>verdes</b> (ricos en nitrógeno: yerba, cáscaras, pasto) y <b>marrones</b> (ricos en carbono: hojas secas, cartón, aserrín), más humedad y aire. Si se desbalancea, apesta, atrae plagas o se detiene.',
+  goal:'Mantené el carbono/nitrógeno y la humedad dentro de la zona verde.',
+  data:'Cerca de la mitad de la basura domiciliaria argentina es orgánica. Compostarla evita que genere metano, un gas de efecto invernadero unas 28 veces más potente que el CO₂.'},
+
+ {id:'m6',icon:'🌲',place:'Santo Tomé',name:'Simbiosis foresto-industrial',game:'simbiosis',
+  concept:'Simbiosis industrial',
+  hint:'En el corredor forestal, el residuo de una fábrica es la materia prima de la otra.',
+  brief:'La <b>simbiosis industrial</b> conecta empresas para que los subproductos de una sean insumos de otra. Así nacen los parques ecoindustriales: menos residuos, menos costos y más empleo local.',
+  goal:'Conectá cada subproducto con la industria que puede aprovecharlo.',
+  data:'Corrientes es la principal provincia forestal del país por superficie implantada de pino y eucalipto. El aserrín, la corteza y el chip son subproductos con destino energético, de tableros y de sustratos.'},
+
+ {id:'m7',icon:'⚡',place:'Ituzaingó',name:'Ciclo de vida técnico',game:'ciclovida',
+  concept:'Ciclo de vida y logística inversa',
+  hint:'Junto a Yacyretá vas a seguir la vida completa de la energía y sus materiales.',
+  brief:'Los materiales técnicos deben volver. La <b>logística inversa</b> es el camino de regreso del producto usado hasta la planta que lo recupera. Sin ese camino, la circularidad es solo una idea.',
+  goal:'Ordená correctamente cada ciclo de vida, de principio a fin.',
+  data:'Una batería de litio bien gestionada permite recuperar más del 90% de su níquel, cobalto y cobre. Mal descartada, una sola pila puede contaminar miles de litros de agua.'},
+
+ {id:'m8',icon:'🏛️',place:'Consejo Provincial',name:'Decisiones de provincia',game:'consejo',
+  concept:'Políticas públicas circulares',
+  hint:'Volvés a la capital: ahora las decisiones son tuyas y afectan a toda Corrientes.',
+  brief:'Una provincia circular necesita reglas: <b>Responsabilidad Extendida del Productor</b>, separación en origen, compras públicas sostenibles, apoyo a recuperadores urbanos y ecoparques. Tenés presupuesto limitado y tres años de gestión.',
+  goal:'Invertí el presupuesto de cada año y llevá los cuatro indicadores a buen puerto.',
+  data:'Las cooperativas de recuperadores urbanos recuperan una porción enorme de los reciclables de las ciudades argentinas. Formalizar su trabajo es una de las políticas circulares más costo-efectivas.'}
+];
+LEVELS[0].x=22;LEVELS[0].y=12; LEVELS[1].x=34;LEVELS[1].y=24;
+LEVELS[2].x=24;LEVELS[2].y=40; LEVELS[3].x=20;LEVELS[3].y=55;
+LEVELS[4].x=52;LEVELS[4].y=57; LEVELS[5].x=80;LEVELS[5].y=63;
+LEVELS[6].x=72;LEVELS[6].y=32; LEVELS[7].x=48;LEVELS[7].y=14;
+
+const BADGES=[
+ {id:'b_start',e:'🚩',n:'Primer paso',d:'Completaste tu primera misión'},
+ {id:'b_perfect',e:'💯',n:'Impecable',d:'3 estrellas en una misión'},
+ {id:'b_streak',e:'🔥',n:'Racha de 5',d:'5 aciertos seguidos'},
+ {id:'b_half',e:'🧭',n:'Medio camino',d:'4 misiones completas'},
+ {id:'b_all',e:'🗺️',n:'Ruta completa',d:'Las 8 misiones completas'},
+ {id:'b_design',e:'✏️',n:'Ecodiseñador/a',d:'Producto con puntaje alto de diseño'},
+ {id:'b_compost',e:'🪱',n:'Maestro/a del compost',d:'Compostera equilibrada de punta a punta'},
+ {id:'b_gov',e:'🏛️',n:'Gestión circular',d:'Los 4 indicadores en verde'},
+ {id:'b_stars',e:'⭐',n:'Estrella correntina',d:'20 estrellas o más'},
+ {id:'b_cert',e:'🎓',n:'Agente Circular',d:'Aprobaste el desafío final'}
+];
+
+/* ---------------- Dificultad ---------------- */
+function DIF(){ return {exp:{rounds:6,time:0,label:'Explorador/a'},
+  inv:{rounds:8,time:22,label:'Investigador/a'},
+  est:{rounds:10,time:15,label:'Estratega'}}[S.band||'inv']; }
+
+/* ---------------- Briefing ---------------- */
+function renderBriefing(l){
+  const st=lvState(l.id);
+  screen(`<div class="wrap narrow stagger">
+    <div class="panel">
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="font-size:2.3rem">${l.icon}</div>
+        <div><div class="eyebrow">Misión ${LEVELS.indexOf(l)+1} · ${l.place}</div>
+        <h2 class="display" style="font-size:1.35rem;">${l.name}</h2></div>
+      </div>
+      <div class="divider"></div>
+      <span class="chip green">📚 ${l.concept}</span>
+      <p class="lead" style="margin:13px 0 0;font-size:.94rem;">${l.brief}</p>
+      <div class="prompt" style="margin-top:14px;"><b>Tu objetivo:</b> ${l.goal}</div>
+      ${st.done?`<div class="muted" style="font-size:.78rem;margin-top:10px;">Mejor resultado: ${'★'.repeat(st.stars)}${'☆'.repeat(3-st.stars)} · ${st.best}%</div>`:''}
+    </div>
+    <button class="btn green block" style="margin-top:14px" id="start">Comenzar misión</button>
+    <button class="btn ghost block sm" style="margin-top:9px" data-go="map">Volver al mapa</button>
+  </div>`,{title:l.place,back:'map'});
+  document.getElementById('start').onclick=()=>{Snd.tap();runGame(l);};
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
 }
 
-/* ---- MINIJUEGO 4: Armar la cadena circular (ordenar pasos) ---- */
-function gameCycleChain(diff, id){
-  const chains = [
-    ['🍌 Fruta','🍽️ Consumo','🍂 Cáscara','🪱 Compost','🌱 Abono para nueva planta'],
-    ['🌳 Árbol','📄 Papel','🗞️ Uso','♻️ Reciclado','📦 Nueva caja'],
-    ['🛢️ Petróleo','🧴 Plástico','🚰 Botella usada','♻️ Reciclaje','👕 Ropa reciclada'],
-  ];
-  const steps = shuffle(chains)[0].slice(0, Math.min(chains[0].length, 3+ (diff.items>6?2:diff.items>4?1:0)));
-  const shuffled = shuffle(steps.map((s,i)=>({s,i})));
-  let order = [];
-  show(`
-    <div id="minigame-area">
-      <div style="text-align:center;padding-top:8px;"><h2>Armá el ciclo 🔄</h2><p class="sub" style="margin:0;">Tocá los pasos en el orden correcto.</p></div>
-      <div id="chain" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;padding:0 6%;"></div>
-      <div id="pool" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:26px;padding:0 6%;"></div>
-    </div>`,{sky:true, hud:true});
-  const area = document.getElementById('scr');
-  let mistakes=0;
-  attachTimer(area, diff.time, ()=> finishLevel(id, order.length>=steps.length && mistakes<3, starsFrom(steps.length-mistakes, steps.length)));
-  renderChainUI();
-  function renderChainUI(){
-    document.getElementById('chain').innerHTML = steps.map((s,i)=>`<div style="width:60px;height:60px;border-radius:14px;background:${order[i]!==undefined?'#3FBF7F':'#ffffff55'};display:flex;align-items:center;justify-content:center;font-size:1.6em;border:3px solid #fff;">${order[i]!==undefined?steps[i].split(' ')[0]:i+1}</div>`).join('');
-    document.getElementById('pool').innerHTML = shuffled.map(o=>`<div class="poolcard" data-i="${o.i}" style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 4px 10px rgba(0,0,0,.15);font-weight:bold;cursor:pointer;${order.includes(o.i)?'opacity:.25;pointer-events:none;':''}">${o.s}</div>`).join('');
-    document.querySelectorAll('.poolcard').forEach(el=>{
-      el.onclick=()=>{
-        const i=+el.dataset.i;
-        if(i===order.length){ order.push(i); AudioX.correct(); }
-        else { mistakes++; AudioX.wrong(); toast('¡Ese no va ahí todavía!',900); }
-        renderChainUI();
-        if(order.length===steps.length){ setTimeout(()=>finishLevel(id, mistakes<3, starsFrom(steps.length-mistakes, steps.length)),500); }
-      };
-    });
-  }
+/* ---------------- Marco de juego ---------------- */
+function gameShell(l,body,opts={}){
+  const d=screen(`<div class="wrap narrow">
+    <div class="gamehead">
+      <span class="chip">${l.icon} ${l.place}</span>
+      <span class="chip" id="prog">—</span>
+      <span class="grow" style="flex:1"></span>
+      ${opts.timer&&S.settings.timer?'<span class="chip gold timer" id="clock">⏱ --</span>':''}
+    </div>
+    <div class="bar thin" style="margin-bottom:14px;"><i id="pbar" style="width:0%"></i></div>
+    <div id="gbody">${body}</div>
+  </div>`,{title:l.name,back:'map'});
+  return d;
+}
+function setProg(i,n){ const p=document.getElementById('prog'), b=document.getElementById('pbar');
+  if(p) p.textContent=`Ronda ${Math.min(i+1,n)} / ${n}`; if(b) b.style.width=(i/n*100)+'%'; }
+function useTimer(secs,onEnd){
+  if(!S.settings.timer||!secs) return;
+  const el=document.getElementById('clock'); if(!el) return;
+  let t=secs; el.textContent='⏱ '+t;
+  const iv=setInterval(()=>{ t--; el.textContent='⏱ '+Math.max(t,0);
+    el.classList.toggle('warn',t<=5);
+    if(t<=0){ clearInterval(iv); onEnd(); } },1000);
+  stopTimer=()=>clearInterval(iv);
+  return ()=>{clearInterval(iv); if(stopTimer)stopTimer=null;};
 }
 
-/* ---- MINIJUEGO 5: Elegir fuentes de energía limpia (multi-selección con feedback) ---- */
-function gameEnergyPick(diff, id){
-  const options = [
-    {n:'Sol (paneles solares)',e:'☀️',clean:true},{n:'Viento (molinos)',e:'🌬️',clean:true},
-    {n:'Carbón',e:'⚫',clean:false},{n:'Agua (represas)',e:'🌊',clean:true},
-    {n:'Petróleo',e:'🛢️',clean:false},{n:'Geotermia',e:'🌋',clean:true},
-    {n:'Gas',e:'🔥',clean:false},
-  ];
-  const chosen = shuffle(options).slice(0, diff.items>6?7:diff.items>4?6:4);
-  let picked = new Set(), locked=false;
-  show(`
-    <div id="minigame-area" style="overflow-y:auto;">
-      <div style="text-align:center;padding-top:8px;"><h2>Energía para la Isla ⚡</h2><p class="sub" style="margin:0;">Elegí las fuentes que no agotan el planeta.</p></div>
-      <div id="grid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px;padding:0 6% 10px;"></div>
-      <div style="text-align:center;"><button class="btn green" id="confirm">Confirmar ⚡</button></div>
-    </div>`,{sky:true, hud:true});
-  document.getElementById('grid').innerHTML = chosen.map((o,i)=>`
-    <div class="energyopt" data-i="${i}" style="width:42%;background:#fff;border-radius:16px;padding:14px;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,.15);border:3px solid transparent;cursor:pointer;">
-      <div style="font-size:2em;">${o.e}</div><div style="font-weight:bold;font-size:.85em;color:#333;">${o.n}</div>
-    </div>`).join('');
-  document.querySelectorAll('.energyopt').forEach(el=>{
-    el.onclick=()=>{
-      if(locked) return;
-      AudioX.pop();
-      const i=+el.dataset.i;
-      if(picked.has(i)){ picked.delete(i); el.style.borderColor='transparent'; }
-      else { picked.add(i); el.style.borderColor='var(--amarillo)'; }
-    };
-  });
-  document.getElementById('confirm').onclick=()=>{
-    if(locked) return; locked=true; AudioX.click();
-    let correct=0, wrong=0;
-    document.querySelectorAll('.energyopt').forEach(el=>{
-      const i=+el.dataset.i; const o=chosen[i];
-      const isPicked = picked.has(i);
-      if(o.clean && isPicked){ correct++; el.style.borderColor='var(--verde)'; el.style.background='#E4FCEE'; }
-      else if(!o.clean && !isPicked){ correct++; }
-      else { wrong++; el.style.borderColor='#E05A5A'; el.style.background='#FDE8E8'; }
-    });
-    AudioX[wrong===0?'win':'wrong']();
-    setTimeout(()=>finishLevel(id, correct>=Math.ceil(chosen.length*0.7), starsFrom(correct,chosen.length)),1100);
-  };
+/* ---------------- Fin de misión ---------------- */
+function finishLevel(l,correct,total,extra){
+  if(stopTimer){stopTimer();stopTimer=null;}
+  const pct=Math.round(correct/Math.max(total,1)*100);
+  const stars=pct>=90?3:pct>=70?2:pct>=50?1:0;
+  const pass=pct>=50;
+  const prev=lvState(l.id);
+  S.levels[l.id]={stars:Math.max(prev.stars||0,stars),best:Math.max(prev.best||0,pct),done:prev.done||pass};
+  S.stats.correct+=correct; S.stats.total+=total; S.stats.played++;
+  addXP(correct*10+stars*25);
+  if(pass) grantBadge('b_start');
+  if(stars===3) grantBadge('b_perfect');
+  if(Object.values(S.levels).filter(x=>x.done).length>=4) grantBadge('b_half');
+  if(Object.values(S.levels).filter(x=>x.done).length>=LEVELS.length) grantBadge('b_all');
+  if(totalStars()>=20) grantBadge('b_stars');
+  save();
+  pass?(Snd.win(),confetti(70)):Snd.lose();
+  const i=LEVELS.indexOf(l), nxt=LEVELS[i+1];
+  screen(`<div class="wrap narrow stagger" style="padding-top:26px;">
+    <div class="panel" style="text-align:center;">
+      <div style="font-size:2.6rem;animation:pop .5s ease both">${pass?'🎉':'💪'}</div>
+      <h2 class="display" style="font-size:1.4rem;margin-top:6px;">${pass?'Misión cumplida':'Casi lo lográs'}</h2>
+      <div class="stars" style="margin:10px 0;">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+      <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;">
+        <span class="chip green">${correct}/${total} correctas</span>
+        <span class="chip blue">${pct}% de acierto</span>
+        <span class="chip gold">+${correct*10+stars*25} 🌱</span>
+      </div>
+      ${extra?`<div class="prompt" style="margin-top:14px;text-align:left;">${extra}</div>`:''}
+    </div>
+    <div class="panel" style="margin-top:12px;">
+      <div class="eyebrow">Saber + · Corrientes</div>
+      <p style="font-size:.9rem;line-height:1.6;margin:8px 0 0;">${l.data}</p>
+    </div>
+    <div style="display:grid;gap:9px;margin-top:14px;">
+      ${pass&&nxt?`<button class="btn green block" id="next">Siguiente misión: ${nxt.place} →</button>`:''}
+      <button class="btn ${pass?'ghost':''} block" id="again">↻ Reintentar esta misión</button>
+      <button class="btn ghost block sm" data-go="map">Volver al mapa</button>
+    </div>
+  </div>`,{title:'Resultado',back:'map'});
+  const n=document.getElementById('next'); if(n) n.onclick=()=>{Snd.tap();renderBriefing(nxt);};
+  document.getElementById('again').onclick=()=>{Snd.tap();runGame(l);};
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
 }
 
-/* ---- MINIJUEGO 6 (final): Quiz de decisiones del Consejo del Planeta ---- */
-function gameFinalQuiz(diff, id){
-  const bank = [
-    {q:'Un vecino tira aceite de cocina por la pileta. ¿Qué le decís?',
-     opts:['Que está bien, se diluye','Que lo junte en una botella y lo lleve a un punto de reciclaje','Que use más jabón para disimular','Nada, no es importante'], correct:1},
-    {q:'¿Qué significa "economía circular"?',
-     opts:['Comprar y tirar rápido','Reutilizar y transformar los recursos en vez de desecharlos','Solo reciclar plástico','Usar más energía cada año'], correct:1},
-    {q:'Una fábrica genera restos de tela. ¿Qué es más circular?',
-     opts:['Quemarlos','Enterrarlos','Usarlos para hacer rellenos de almohadones','Tirarlos al río'], correct:2},
-    {q:'¿Cuál ayuda más a un río limpio?',
-     opts:['Tirar pilas usadas','Plantar árboles cerca de la orilla','Verter pintura sobre él','Dejar bolsas flotando'], correct:1},
-    {q:'Si algo se rompe, ¿qué hacemos en la economía circular antes que tirarlo?',
-     opts:['Tirarlo directo','Ver si se puede reparar o reusar','Comprar 3 nuevos','Quemarlo'], correct:1},
-    {q:'¿Qué fuente de energía se "agota" con el tiempo?',
-     opts:['Solar','Eólica','Petróleo','Geotérmica'], correct:2},
-  ];
-  const n = diff.items<=4?4:(diff.items<=6?5:6);
-  const questions = shuffle(bank).slice(0,n);
-  let idx=0, correct=0;
-  nextQ();
-  function nextQ(){
-    if(idx>=questions.length){ finishLevel(id, correct>=Math.ceil(n*0.6), starsFrom(correct,n)); return; }
-    const q = questions[idx];
-    const optsIdx = shuffle(q.opts.map((o,i)=>({o,i})));
-    show(`
-      <div class="card" style="max-width:520px;">
-        <div class="progressbar"><div style="width:${(idx/questions.length*100)}%;"></div></div>
-        <h2>${q.q}</h2>
-        <div id="opts" style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
-          ${optsIdx.map(o=>`<div class="quiz-opt" data-correct="${o.i===q.correct}">${o.o}</div>`).join('')}
-        </div>
-      </div>`,{sky:true, hud:true});
-    document.querySelectorAll('.quiz-opt').forEach(el=>{
-      el.onclick=()=>{
-        if(el.dataset.locked) return;
-        document.querySelectorAll('.quiz-opt').forEach(o=>o.dataset.locked='1');
-        const ok = el.dataset.correct==='true';
-        el.classList.add(ok?'correct':'wrong');
-        if(ok){ correct++; AudioX.correct(); } else {
-          AudioX.wrong();
-          document.querySelectorAll('.quiz-opt').forEach(o=>{ if(o.dataset.correct==='true') o.classList.add('correct'); });
-        }
-        setTimeout(()=>{ idx++; nextQ(); }, 1000);
-      };
-    });
-  }
-}
+/* helper de racha */
+let streak=0;
+function hit(ok){ if(ok){streak++; if(streak>=5) grantBadge('b_streak');} else streak=0; }
 
-/* ============ helpers ============ */
-function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function starsFrom(correct,total,forceHigh){
-  const ratio = total? correct/total : 0;
-  if(forceHigh || ratio>=0.9) return 3;
-  if(ratio>=0.65) return 2;
-  if(ratio>=0.4) return 1;
-  return 1;
-}
-function makeDraggable(el, onDrop, zoneIds){
-  let dragging=false, ox=0, oy=0, startX=0, startY=0;
-  el.style.position='relative';
-  function point(e){ return e.touches? e.touches[0] : e; }
-  function down(e){
-    dragging=true; const p=point(e);
-    const r=el.getBoundingClientRect(); startX=r.left; startY=r.top; ox=p.clientX; oy=p.clientY;
-    el.style.zIndex=100; e.preventDefault();
-  }
-  function move(e){
-    if(!dragging) return; const p=point(e);
-    const dx=p.clientX-ox, dy=p.clientY-oy;
-    el.style.position='fixed'; el.style.left=(startX+dx)+'px'; el.style.top=(startY+dy)+'px';
-    e.preventDefault();
-  }
-  function up(e){
-    if(!dragging) return; dragging=false;
-    const p = e.changedTouches? e.changedTouches[0] : e;
-    let landed=null;
-    for(const zid of zoneIds){
-      const z=document.getElementById(zid); if(!z) continue;
-      const r=z.getBoundingClientRect();
-      if(p.clientX>=r.left && p.clientX<=r.right && p.clientY>=r.top && p.clientY<=r.bottom){ landed=zid; z.classList.add('over'); setTimeout(()=>z.classList.remove('over'),300); }
+/* =========================================================
+   DISPATCHER
+   ========================================================= */
+function runGame(l){ streak=0;
+  ({ciclos:gCiclos,escalera:gEscalera,cascada:gCascada,ecodiseno:gEcodiseno,
+    compost:gCompost,simbiosis:gSimbiosis,ciclovida:gCicloVida,consejo:gConsejo}[l.game])(l); }
+
+/* =========================================================
+   M1 · CICLO BIOLÓGICO vs TÉCNICO
+   ========================================================= */
+const CICLO_ITEMS=[
+ {n:'Cáscara de mandioca',e:'🥔',c:'bio',w:'Materia orgánica: se composta y vuelve al suelo como nutriente.'},
+ {n:'Yerba mate usada',e:'🧉',c:'bio',w:'Excelente para compost y para huertas; es puro ciclo biológico.'},
+ {n:'Botella PET',e:'🧴',c:'tec',w:'El PET no se degrada: debe volver a la industria para hacer nuevas botellas o fibras.'},
+ {n:'Lata de aluminio',e:'🥫',c:'tec',w:'El aluminio se recicla infinitas veces sin perder calidad. Nunca al suelo.'},
+ {n:'Hojas de eucalipto',e:'🍂',c:'bio',w:'Biomasa vegetal: compost, cobertura o energía.'},
+ {n:'Celular roto',e:'📱',c:'tec',w:'RAEE: contiene metales valiosos y tóxicos. Circuito técnico obligatorio.'},
+ {n:'Restos de pescado',e:'🐟',c:'bio',w:'Se transforma en compost o harina; nutriente del ciclo biológico.'},
+ {n:'Vidrio de frasco',e:'🫙',c:'tec',w:'Se funde y vuelve a ser vidrio, una y otra vez.'},
+ {n:'Algodón 100%',e:'👕',c:'bio',w:'Fibra natural sin mezclas: puede compostarse al final de su vida útil.'},
+ {n:'Remera de poliéster',e:'🎽',c:'tec',w:'Es plástico textil: al lavarse suelta microfibras. Debe reciclarse, no enterrarse.'},
+ {n:'Aserrín de pino',e:'🪵',c:'bio',w:'Subproducto forestal: cama animal, sustrato o compost.'},
+ {n:'Pila alcalina',e:'🔋',c:'tec',w:'Jamás al suelo ni al río: recolección diferenciada y recuperación de metales.'},
+ {n:'Cáscara de naranja',e:'🍊',c:'bio',w:'Aceites esenciales, pectina y compost: biológico de alto valor.'},
+ {n:'Neumático usado',e:'🛞',c:'tec',w:'Caucho vulcanizado: no se degrada. Se granula para pisos y asfalto.'}
+];
+function gCiclos(l){
+  const d=DIF(); const items=shuffle(CICLO_ITEMS).slice(0,d.rounds);
+  let i=0,correct=0;
+  gameShell(l,`<div id="stage"></div>`,{timer:true});
+  paint();
+  function paint(){
+    if(i>=items.length) return finishLevel(l,correct,items.length);
+    setProg(i,items.length);
+    const it=items[i];
+    document.getElementById('gbody').querySelector('#stage').innerHTML=`
+      <div class="panel card-item" style="text-align:center;padding:26px 18px;">
+        <div style="font-size:3.2rem">${it.e}</div>
+        <h3 style="margin-top:8px;font-size:1.15rem">${it.n}</h3>
+        <p class="muted" style="font-size:.8rem;margin:6px 0 0;">¿A qué ciclo pertenece?</p>
+      </div>
+      <div class="bins" style="margin-top:14px;">
+        <div class="bin" data-c="bio" style="border-color:rgba(111,215,158,.6)">🌱<b>Ciclo biológico</b><span>Vuelve al suelo como nutriente</span></div>
+        <div class="bin" data-c="tec" style="border-color:rgba(91,182,238,.6)">⚙️<b>Ciclo técnico</b><span>Vuelve a la industria</span></div>
+      </div>
+      <div id="fb" style="margin-top:12px"></div>`;
+    const done=useTimer(d.time,()=>answer(null));
+    document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ if(done)done(); answer(b.dataset.c); });
+    function answer(c){
+      if(done)done();
+      const ok=c===it.c; hit(ok); if(ok){correct++;Snd.good();}else Snd.bad();
+      document.querySelectorAll('[data-c]').forEach(b=>{ b.style.pointerEvents='none';
+        if(b.dataset.c===it.c) b.classList.add('ok'); else if(b.dataset.c===c) b.classList.add('no'); });
+      document.getElementById('fb').innerHTML=`<div class="feedback ${ok?'ok':'no'}">
+        <b>${ok?'✔ Correcto':(c?'✘ No es así':'⏱ Se acabó el tiempo')}</b>${it.w}
+        <div style="margin-top:10px"><button class="btn sm" id="nx">Continuar →</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{Snd.tap();i++;paint();};
     }
-    if(landed){ AudioX.drop(); onDrop(landed); }
-    else { el.style.position='relative'; el.style.left=0; el.style.top=0; }
   }
-  el.addEventListener('mousedown',down); window.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
-  el.addEventListener('touchstart',down,{passive:false}); window.addEventListener('touchmove',move,{passive:false}); window.addEventListener('touchend',up);
 }
 
-/* ============ INICIO ============ */
-renderTitle();
+/* =========================================================
+   M2 · ESCALERA DE LAS 10R
+   ========================================================= */
+const R_SCALE=[
+ {k:'rechazar',n:'R1 Rechazar',d:'No usar el producto; evitar que exista el residuo.'},
+ {k:'repensar',n:'R2 Repensar',d:'Cambiar el modelo: compartir, alquilar, usar más intensamente.'},
+ {k:'reducir',n:'R3 Reducir',d:'Usar menos material o energía por unidad.'},
+ {k:'reutilizar',n:'R4 Reutilizar',d:'Otra persona vuelve a usar el producto tal cual.'},
+ {k:'reparar',n:'R5 Reparar',d:'Arreglar para extender la vida útil.'},
+ {k:'restaurar',n:'R6 Restaurar',d:'Poner a nuevo un producto viejo completo.'},
+ {k:'refabricar',n:'R7 Refabricar',d:'Desarmar y armar productos nuevos con piezas recuperadas.'},
+ {k:'reconvertir',n:'R8 Reconvertir',d:'Usar el producto o sus partes con otra función.'},
+ {k:'reciclar',n:'R9 Reciclar',d:'Procesar el material para hacer materia prima nueva.'},
+ {k:'recuperar',n:'R10 Recuperar energía',d:'Quemar con recuperación energética. Último recurso.'}
+];
+const R_CASES=[
+ {t:'En el kiosco te ofrecen una bolsita de plástico para un solo alfajor.',best:'rechazar',
+  w:'Rechazar es el escalón más alto: el residuo que no se genera no necesita ser gestionado.'},
+ {t:'La escuela necesita un proyector, pero lo usaría solo 6 veces al año.',best:'repensar',
+  w:'Repensar el modelo: compartirlo entre escuelas o alquilarlo evita fabricar un equipo que quedará ocioso.'},
+ {t:'La bici de tu hermana tiene la cadena salida y los frenos flojos.',best:'reparar',
+  w:'Reparar mantiene el producto entero en uso; siempre está por encima de reciclar el metal.'},
+ {t:'El guardapolvo te quedó chico, pero está impecable.',best:'reutilizar',
+  w:'Reutilizar: otra persona lo usa tal cual, sin gastar energía en transformarlo.'},
+ {t:'Una empresa de Goya recibe motores usados, los desarma, cambia piezas y los vende con garantía.',best:'refabricar',
+  w:'Refabricación industrial: vuelve a condición de nuevo usando piezas recuperadas.'},
+ {t:'Quedan 300 pallets de madera rotos en un depósito de Santo Tomé.',best:'reconvertir',
+  w:'Reconvertir (upcycling): la madera pasa a ser mobiliario o huertas urbanas con otra función.'},
+ {t:'Tu familia compra agua en botellas de 500 ml todos los días.',best:'reducir',
+  w:'Reducir: una botella reutilizable y agua segura bajan drásticamente el material usado.'},
+ {t:'Juntaste 40 botellas de vidrio que ya no sirven para envasar.',best:'reciclar',
+  w:'Cuando ya no hay reutilización posible, reciclar recupera el material, aunque con gasto de energía.'},
+ {t:'Una máquina de coser de 1970 está completa pero deteriorada y sin uso.',best:'restaurar',
+  w:'Restaurar la devuelve a servicio completo, conservando casi todo el material original.'},
+ {t:'Quedan barros de poda y residuos forestales que ya no sirven para compost ni tableros.',best:'recuperar',
+  w:'Solo al final de la escalera: recuperar energía de la biomasa evita el enterramiento, pero pierde el material.'}
+];
+function gEscalera(l){
+  const d=DIF(); const cases=shuffle(R_CASES).slice(0,Math.min(d.rounds,R_CASES.length));
+  let i=0,correct=0;
+  gameShell(l,`<div id="stage"></div>`,{timer:true});
+  paint();
+  function paint(){
+    if(i>=cases.length) return finishLevel(l,correct,cases.length);
+    setProg(i,cases.length);
+    const c=cases[i];
+    const bestIdx=R_SCALE.findIndex(r=>r.k===c.best);
+    const distract=shuffle(R_SCALE.filter(r=>r.k!==c.best && Math.abs(R_SCALE.indexOf(r)-bestIdx)<=6)).slice(0,3);
+    const opts=shuffle([R_SCALE[bestIdx],...distract]);
+    document.querySelector('#stage').innerHTML=`
+      <div class="prompt card-item"><b>Situación</b><br>${c.t}</div>
+      <p class="muted" style="font-size:.8rem;margin:12px 0 9px;">¿Cuál es la estrategia MÁS ALTA de la escalera que resuelve esto?</p>
+      <div class="optgrid">${opts.map(o=>`<button class="opt" data-k="${o.k}"><span class="k">${o.n.split(' ')[0]}</span>
+        <span><b>${o.n.replace(/^R\d+ /,'')}</b><br><span class="muted" style="font-size:.79rem">${o.d}</span></span></button>`).join('')}</div>
+      <div id="fb" style="margin-top:12px"></div>`;
+    const done=useTimer(d.time,()=>answer(null));
+    document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>answer(b.dataset.k));
+    function answer(k){
+      if(done)done();
+      const ok=k===c.best; hit(ok); if(ok){correct++;Snd.good();}else Snd.bad();
+      document.querySelectorAll('[data-k]').forEach(b=>{ b.style.pointerEvents='none';
+        if(b.dataset.k===c.best)b.classList.add('ok'); else if(b.dataset.k===k)b.classList.add('no'); else b.classList.add('dim'); });
+      document.getElementById('fb').innerHTML=`<div class="feedback ${ok?'ok':'no'}">
+        <b>${ok?'✔ Excelente criterio':(k?'✘ Hay una opción mejor':'⏱ Tiempo')}</b>${c.w}
+        <div style="margin-top:10px"><button class="btn sm" id="nx">Continuar →</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{Snd.tap();i++;paint();};
+    }
+  }
+}
+
+/* =========================================================
+   M3 · CASCADA DE VALOR
+   ========================================================= */
+const CASCADA=[
+ {sub:'Naranjas de descarte por tamaño, sanas y frescas',e:'🍊',
+  opts:[{t:'Vender como fruta de segunda selección para consumo humano',v:5,w:'El escalón más alto: sigue siendo alimento para personas. Nada se pierde.'},
+        {t:'Elaborar jugo concentrado',v:4,w:'Buen destino, pero ya requiere energía de proceso.'},
+        {t:'Dar como ración a ganado',v:3,w:'Baja un escalón: valor menor que el alimento humano.'},
+        {t:'Compostar',v:2,w:'Valioso, pero desperdicia fruta apta para comer.'}]},
+ {sub:'Cáscara de naranja de la planta de jugo',e:'🍋',
+  opts:[{t:'Extraer aceites esenciales y pectina',v:5,w:'Máximo valor: ingredientes para cosmética y alimentos. Después del proceso, el resto todavía sirve.'},
+        {t:'Secar para alimento balanceado animal',v:4,w:'Buen destino, aunque menor valor que los ingredientes.'},
+        {t:'Compostar en la chacra',v:3,w:'Devuelve nutrientes al suelo, pero pierde el valor industrial.'},
+        {t:'Quemar en caldera',v:2,w:'Solo energía: se pierde todo el valor material.'}]},
+ {sub:'Aserrín y viruta de un aserradero de pino',e:'🪵',
+  opts:[{t:'Fabricar tableros aglomerados y pellets de calidad',v:5,w:'El material sigue siendo material: es el uso de mayor valor.'},
+        {t:'Usar como cama para animales y luego compostar',v:4,w:'Uso en cascada real: primero sirve, después nutre el suelo.'},
+        {t:'Compostar directamente',v:3,w:'Válido, aunque se saltea un uso intermedio posible.'},
+        {t:'Quemar para generar vapor',v:2,w:'Energía inmediata, material perdido.'}]},
+ {sub:'Suero de una quesería de la zona de Mercedes',e:'🥛',
+  opts:[{t:'Obtener proteína de suero para alimentación humana',v:5,w:'Alto valor nutricional y económico; el suero deja de ser un problema.'},
+        {t:'Alimentar cerdos del establecimiento',v:4,w:'Uso tradicional y efectivo, valor medio.'},
+        {t:'Producir biogás en un biodigestor',v:3,w:'Recupera energía y deja digerido para el suelo.'},
+        {t:'Volcarlo a un curso de agua',v:0,w:'Ilegal y muy contaminante: el suero consume el oxígeno del agua.'}]},
+ {sub:'Guardapolvos y ropa de trabajo dados de baja',e:'👕',
+  opts:[{t:'Reparar y donar los que están en buen estado',v:5,w:'Reutilización directa: máximo valor conservado.'},
+        {t:'Confeccionar bolsas y delantales con la tela sana',v:4,w:'Reconversión: el textil sigue siendo textil.'},
+        {t:'Deshilachar para relleno y trapos industriales',v:3,w:'Reciclado de baja calidad, pero evita el basural.'},
+        {t:'Enterrar en relleno sanitario',v:0,w:'Pérdida total de material y de trabajo incorporado.'}]},
+ {sub:'Pan y verduras vencidas de un supermercado de la capital',e:'🥖',
+  opts:[{t:'Donar antes del vencimiento a comedores mediante banco de alimentos',v:5,w:'Prevención del desperdicio: alimento para personas, el escalón más alto.'},
+        {t:'Entregar a productores para alimentación animal',v:4,w:'Buena salida cuando ya no es apto para consumo humano.'},
+        {t:'Compostaje municipal',v:3,w:'Cierra el ciclo biológico, pero el alimento ya se perdió.'},
+        {t:'Relleno sanitario',v:0,w:'Genera metano y desperdicia comida, energía y agua.'}]}
+];
+function gCascada(l){
+  const d=DIF(); const rounds=shuffle(CASCADA).slice(0,Math.min(Math.max(4,d.rounds-3),CASCADA.length));
+  let i=0,correct=0;
+  gameShell(l,`<div id="stage"></div>`,{timer:true});
+  paint();
+  function paint(){
+    if(i>=rounds.length) return finishLevel(l,correct,rounds.length);
+    setProg(i,rounds.length);
+    const r=rounds[i], opts=shuffle(r.opts), best=Math.max(...r.opts.map(o=>o.v));
+    document.querySelector('#stage').innerHTML=`
+      <div class="panel tight card-item" style="display:flex;gap:12px;align-items:center;">
+        <div style="font-size:2.1rem">${r.e}</div><div><div class="eyebrow">Subproducto</div><b style="font-size:.95rem">${r.sub}</b></div></div>
+      <p class="muted" style="font-size:.8rem;margin:12px 0 9px;">Elegí el destino de <b>mayor valor</b> posible.</p>
+      <div class="optgrid">${opts.map((o,j)=>`<button class="opt" data-v="${o.v}" data-j="${r.opts.indexOf(o)}"><span class="k">${'ABCD'[j]}</span><span>${o.t}</span></button>`).join('')}</div>
+      <div id="fb" style="margin-top:12px"></div>`;
+    const done=useTimer(d.time,()=>answer(null));
+    document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>answer(b));
+    function answer(b){
+      if(done)done();
+      const v=b?+b.dataset.v:-1, ok=v===best; hit(ok); if(ok){correct++;Snd.good();}else Snd.bad();
+      document.querySelectorAll('[data-v]').forEach(x=>{ x.style.pointerEvents='none';
+        if(+x.dataset.v===best)x.classList.add('ok'); else if(x===b)x.classList.add('no'); else x.classList.add('dim'); });
+      const chosen=b?r.opts[+b.dataset.j]:null;
+      const bestOpt=r.opts.find(o=>o.v===best);
+      document.getElementById('fb').innerHTML=`<div class="feedback ${ok?'ok':'no'}">
+        <b>${ok?'✔ Máximo valor recuperado':(b?'✘ Se perdió valor':'⏱ Tiempo')}</b>
+        ${ok?bestOpt.w:(chosen?chosen.w+'<br><br><b style="display:inline">Mejor opción:</b> '+bestOpt.t+'. '+bestOpt.w:bestOpt.w)}
+        <div style="margin-top:10px"><button class="btn sm" id="nx">Continuar →</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{Snd.tap();i++;paint();};
+    }
+  }
+}
+
+/* =========================================================
+   M4 · ECODISEÑO
+   ========================================================= */
+const DESIGN_STEPS=[
+ {q:'Material principal de la carcasa',opts:[
+   {t:'Plástico virgen multicapa liviano',m:{dur:2,rep:2,rec:1,hue:3},w:'Las multicapas son casi imposibles de reciclar: mezclan materiales que no se pueden separar.'},
+   {t:'Polipropileno mono-material reciclado',m:{dur:7,rep:7,rec:10,hue:9},w:'Mono-material y reciclado: fácil de identificar, separar y volver a procesar.'},
+   {t:'Madera de pino certificado de Santo Tomé',m:{dur:8,rep:9,rec:7,hue:8},w:'Recurso renovable y local; reparable y compostable al final si no tiene tratamientos tóxicos.'},
+   {t:'Aluminio de primera fusión',m:{dur:10,rep:8,rec:9,hue:3},w:'Durísimo y reciclable, pero producir aluminio nuevo consume muchísima energía.'}]},
+ {q:'¿Cómo unís las piezas?',opts:[
+   {t:'Adhesivo estructural permanente',m:{dur:6,rep:1,rec:2,hue:5},w:'Pegar para siempre impide reparar y separar materiales: enemigo número uno de la circularidad.'},
+   {t:'Tornillos estándar accesibles',m:{dur:8,rep:10,rec:9,hue:8},w:'Uniones desmontables con herramientas comunes: el producto se puede abrir, arreglar y desarmar.'},
+   {t:'Encastres a presión propios',m:{dur:6,rep:5,rec:6,hue:7},w:'Se desarma, pero los clips se fatigan y requieren repuestos específicos.'},
+   {t:'Soldadura ultrasónica',m:{dur:9,rep:2,rec:4,hue:6},w:'Muy resistente, pero cerrar el producto para siempre elimina la reparación.'}]},
+ {q:'Estrategia de repuestos',opts:[
+   {t:'Sin repuestos: si falla, se cambia todo',m:{dur:3,rep:0,rec:3,hue:3},w:'Obsolescencia asegurada: una junta rota condena el producto entero.'},
+   {t:'Repuestos a 10 años y manual abierto',m:{dur:9,rep:10,rec:8,hue:9},w:'La disponibilidad de repuestos e información es lo que hace real el derecho a reparar.'},
+   {t:'Solo servicio técnico oficial autorizado',m:{dur:7,rep:5,rec:6,hue:6},w:'Mejor que nada, pero encarece y aleja la reparación de los talleres de barrio.'},
+   {t:'Piezas impresas en 3D bajo demanda con archivos públicos',m:{dur:8,rep:9,rec:7,hue:8},w:'Repuestos distribuidos: se fabrican donde se necesitan y evitan stock y transporte.'}]},
+ {q:'Modelo de negocio',opts:[
+   {t:'Venta clásica, cuanto más se vende mejor',m:{dur:5,rep:5,rec:5,hue:5},w:'El fabricante gana vendiendo más unidades: nada lo incentiva a que duren.'},
+   {t:'Producto como servicio: se alquila y la empresa mantiene',m:{dur:10,rep:9,rec:9,hue:8},w:'Si la empresa sigue siendo dueña, le conviene que dure, se repare y vuelva.'},
+   {t:'Venta con programa de recompra y reacondicionado',m:{dur:8,rep:8,rec:9,hue:8},w:'Logística inversa incorporada: el producto vuelve y se revende.'},
+   {t:'Venta con descuento por entregar el equipo viejo',m:{dur:6,rep:6,rec:8,hue:7},w:'Asegura el retorno del material, pero puede empujar recambios innecesarios.'}]},
+ {q:'Fin de vida',opts:[
+   {t:'Etiqueta con instrucciones de desarme y materiales',m:{dur:7,rep:8,rec:10,hue:8},w:'Información clara: quien lo recibe sabe exactamente cómo separar cada material.'},
+   {t:'Ninguna indicación',m:{dur:5,rep:4,rec:2,hue:4},w:'Sin información, el reciclador no puede identificar los plásticos y todo termina mezclado.'},
+   {t:'Puntos de retorno en cada ciudad cabecera',m:{dur:7,rep:7,rec:9,hue:7},w:'Sin canal de retorno accesible, el mejor diseño igual termina en el basural.'},
+   {t:'Producto pensado para durar y transferirse de mano en mano',m:{dur:10,rep:8,rec:6,hue:9},w:'Durabilidad y mercado de segunda mano: la vida útil larga es la mejor circularidad.'}]}
+];
+function gEcodiseno(l){
+  let i=0, acc={dur:0,rep:0,rec:0,hue:0}, log=[];
+  gameShell(l,`<div id="stage"></div>`);
+  paint();
+  function meters(){
+    const f=(v)=>Math.round(v/(i||1)*10);
+    const M=[['Durabilidad','dur','--estero'],['Reparabilidad','rep','--sun'],['Reciclabilidad','rec','--river-l'],['Huella baja','hue','--violet']];
+    return `<div class="meters panel tight" style="margin-bottom:14px;">
+      ${M.map(([n,k])=>`<div class="meter"><span>${n}</span><span class="bar"><i style="width:${f(acc[k])}%"></i></span><b>${f(acc[k])}</b></div>`).join('')}</div>`;
+  }
+  function paint(){
+    if(i>=DESIGN_STEPS.length) return done();
+    setProg(i,DESIGN_STEPS.length);
+    const s=DESIGN_STEPS[i], opts=shuffle(s.opts);
+    document.querySelector('#stage').innerHTML=`${i?meters():''}
+      <div class="prompt card-item"><b>Decisión ${i+1} de 5</b><br>${s.q}</div>
+      <div class="optgrid" style="margin-top:12px">${opts.map((o,j)=>`<button class="opt" data-j="${s.opts.indexOf(o)}"><span class="k">${'ABCD'[j]}</span><span>${o.t}</span></button>`).join('')}</div>
+      <div id="fb" style="margin-top:12px"></div>`;
+    document.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{
+      const o=s.opts[+b.dataset.j];
+      const score=(o.m.dur+o.m.rep+o.m.rec+o.m.hue)/4;
+      const best=Math.max(...s.opts.map(x=>(x.m.dur+x.m.rep+x.m.rec+x.m.hue)/4));
+      const good=score>=best-0.8; hit(good); good?Snd.good():Snd.bad();
+      Object.keys(acc).forEach(k=>acc[k]+=o.m[k]);
+      log.push({q:s.q,t:o.t,score});
+      document.querySelectorAll('[data-j]').forEach(x=>{x.style.pointerEvents='none'; if(x===b)x.classList.add(good?'ok':'no'); else x.classList.add('dim');});
+      document.getElementById('fb').innerHTML=`<div class="feedback ${good?'ok':'no'}">
+        <b>${good?'✔ Gran decisión de diseño':'⚠ Esta decisión te va a costar'}</b>${o.w}
+        <div style="margin-top:10px"><button class="btn sm" id="nx">Siguiente decisión →</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{Snd.tap();i++;paint();};
+    });
+  }
+  function done(){
+    const f=k=>Math.round(acc[k]/5*10);
+    const total=Math.round((f('dur')+f('rep')+f('rec')+f('hue'))/4);
+    const correct=Math.round(total/100*5);
+    if(total>=80) grantBadge('b_design');
+    const veredicto= total>=85?'Producto de referencia: podría venderse como servicio y durar décadas.'
+      : total>=65?'Buen producto circular, con algún punto flojo a mejorar.'
+      : total>=45?'Producto intermedio: cumple, pero mantiene lógicas lineales.'
+      : 'Producto lineal: nació con fecha de vencimiento.';
+    finishLevel(l,correct,5,`<b>Puntaje de ecodiseño: ${total}/100.</b> ${veredicto}<br><br>
+      Durabilidad ${f('dur')} · Reparabilidad ${f('rep')} · Reciclabilidad ${f('rec')} · Huella baja ${f('hue')}`);
+  }
+}
+</script>
+<script>
+/* =========================================================
+   M5 · COMPOSTERA DEL IBERÁ
+   ========================================================= */
+const COMPOST_POOL=[
+ {n:'Yerba mate usada',e:'🧉',cn:-12,hum:8,t:'verde',w:'Verde húmedo: aporta nitrógeno y agua.'},
+ {n:'Cáscaras de verdura',e:'🥬',cn:-14,hum:10,t:'verde',w:'Verde clásico: mucho nitrógeno y humedad.'},
+ {n:'Pasto recién cortado',e:'🌿',cn:-16,hum:12,t:'verde',w:'Muy nitrogenado: en exceso apelmaza y huele mal.'},
+ {n:'Hojas secas',e:'🍂',cn:14,hum:-8,t:'marron',w:'Marrón: carbono y estructura para que entre aire.'},
+ {n:'Cartón sin tinta, trozado',e:'📦',cn:16,hum:-10,t:'marron',w:'Marrón seco: absorbe exceso de humedad.'},
+ {n:'Aserrín de pino',e:'🪵',cn:15,hum:-9,t:'marron',w:'Marrón fino: usar de a poco, aporta mucho carbono.'},
+ {n:'Regar la pila',e:'💧',cn:0,hum:18,t:'agua',w:'El compost debe estar húmedo como esponja escurrida.'},
+ {n:'Voltear y airear',e:'🔄',cn:0,hum:-12,t:'aire',w:'Voltear oxigena, baja humedad y acelera la descomposición.'},
+ {n:'Pilas usadas',e:'🔋',cn:0,hum:0,t:'no',w:'¡Nunca! Metales pesados que contaminan el compost y el suelo.'},
+ {n:'Bolsas de plástico',e:'🛍️',cn:0,hum:0,t:'no',w:'El plástico no se degrada: arruina todo el lote de compost.'},
+ {n:'Aceite de fritura',e:'🛢️',cn:0,hum:0,t:'no',w:'Impermeabiliza la pila, frena el oxígeno y atrae plagas. Va a reciclado de aceite.'},
+ {n:'Huesos y carne',e:'🍖',cn:0,hum:0,t:'no',w:'En compostera doméstica atraen roedores y generan olores.'}
+];
+function gCompost(l){
+  const rounds=DIF().rounds; let cn=50,hum=50,i=0,correct=0,perfect=true;
+  gameShell(l,`<div id="stage"></div>`);
+  const dist=(a,b)=>Math.abs(a-50)+Math.abs(b-50);
+  function zone(v){ return v>=38&&v<=62; }
+  paint();
+  function gauges(){
+    const g=(label,v,lo,hi)=>`<div class="meter"><span>${label}</span>
+      <span class="bar" style="position:relative;background:linear-gradient(90deg,#FF6B6B 0%,#FF6B6B 30%,#3FD08A 38%,#3FD08A 62%,#FF6B6B 70%,#FF6B6B 100%);opacity:.9">
+      <i style="width:2px;margin-left:calc(${Math.max(0,Math.min(100,v))}% - 1px);background:#fff;height:100%;box-shadow:0 0 8px #fff"></i></span>
+      <b style="color:${zone(v)?'#7FE7B4':'#FFB4B4'}">${Math.round(v)}</b></div>
+      <div class="muted" style="font-size:.67rem;margin:-4px 0 4px 113px">${lo} ← → ${hi}</div>`;
+    return `<div class="meters panel tight" style="margin-bottom:12px;">
+      ${g('Carbono/Nitró.',cn,'exceso de verdes','exceso de marrones')}
+      ${g('Humedad',hum,'seco','encharcado')}</div>`;
+  }
+  function paint(){
+    if(i>=rounds){
+      if(perfect&&zone(cn)&&zone(hum)) grantBadge('b_compost');
+      const est=zone(cn)&&zone(hum)?'La compostera terminó equilibrada: en 3 meses tenés abono listo para la huerta.'
+        :'La compostera quedó desequilibrada: va a tardar más y puede generar olores. Revisá la mezcla verdes/marrones.';
+      return finishLevel(l,correct,rounds,est);
+    }
+    setProg(i,rounds);
+    hum-=4; // evaporación
+    const pool=shuffle(COMPOST_POOL);
+    const bad=pool.find(p=>p.t==='no');
+    const opts=shuffle([...pool.filter(p=>p.t!=='no').slice(0,2), ...(Math.random()<.5?[bad]:[pool.filter(p=>p.t!=='no')[2]])]);
+    const results=opts.map(o=>o.t==='no'?9999:dist(cn+o.cn,hum+o.hum));
+    const best=Math.min(...results);
+    document.querySelector('#stage').innerHTML=`${gauges()}
+      <div class="prompt card-item">Semana ${i+1}: ¿qué agregás o hacés hoy para mantener las dos barras en verde?</div>
+      <div class="optgrid" style="grid-template-columns:repeat(3,1fr);margin-top:12px">
+        ${opts.map((o,j)=>`<div class="tile" data-j="${j}"><span class="em">${o.e}</span>${o.n}</div>`).join('')}</div>
+      <div id="fb" style="margin-top:12px"></div>`;
+    document.querySelectorAll('[data-j]').forEach(el=>el.onclick=()=>{
+      const j=+el.dataset.j,o=opts[j];
+      const ok=o.t!=='no'&&results[j]<=best+2;
+      hit(ok); if(ok){correct++;Snd.good();}else{Snd.bad();perfect=false;}
+      if(o.t!=='no'){ cn=Math.max(0,Math.min(100,cn+o.cn)); hum=Math.max(0,Math.min(100,hum+o.hum)); }
+      else { hum=Math.max(0,hum-6); }
+      document.querySelectorAll('[data-j]').forEach(x=>{x.style.pointerEvents='none';
+        if(+x.dataset.j===j) x.classList.add(ok?'ok':'no');});
+      document.getElementById('fb').innerHTML=`<div class="feedback ${ok?'ok':'no'}">
+        <b>${ok?'✔ Buena decisión':'✘ No era lo que necesitaba la pila'}</b>${o.w}
+        ${o.t==='no'?'':`<br><br>Estado: C/N ${Math.round(cn)} · Humedad ${Math.round(hum)}.`}
+        <div style="margin-top:10px"><button class="btn sm" id="nx">Siguiente semana →</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{Snd.tap();i++;paint();};
+    });
+  }
+}
+
+/* =========================================================
+   M6 · SIMBIOSIS INDUSTRIAL
+   ========================================================= */
+const SIMBIOSIS=[
+ {a:'Aserrín y viruta de aserradero',ae:'🪵',b:'Fábrica de tableros y pellets',be:'🧱',w:'El residuo de la madera se vuelve materia prima de tableros aglomerados y combustible densificado.'},
+ {a:'Corteza de pino',ae:'🌲',b:'Vivero de plantines',be:'🌱',w:'La corteza compostada es uno de los mejores sustratos para vivero.'},
+ {a:'Cáscara de arroz',ae:'🌾',b:'Generación de energía y ladrillos',be:'⚡',w:'La cáscara de arroz tiene alto poder calorífico y su ceniza aporta sílice a materiales de construcción.'},
+ {a:'Estiércol de tambo',ae:'🐄',b:'Biodigestor de la cooperativa',be:'🛢️',w:'Produce biogás y un digerido rico en nutrientes que vuelve al campo.'},
+ {a:'Vidrio molido de recuperadores',ae:'🫙',b:'Planta de envases',be:'🏭',w:'El vidrio molido (calcín) funde a menor temperatura: ahorra energía en cada envase nuevo.'},
+ {a:'Aceite vegetal usado de comedores',ae:'🍟',b:'Planta de biodiésel',be:'🚛',w:'Un litro de aceite mal descartado contamina miles de litros de agua; bien gestionado mueve camiones.'},
+ {a:'Cáscara de naranja de la citrícola',ae:'🍊',b:'Laboratorio de aceites esenciales',be:'🧪',w:'Se extrae d-limoneno y pectina: subproductos de mayor valor que la fruta fresca por kilo.'},
+ {a:'Calor residual de caldera',ae:'♨️',b:'Secadero de yerba y té',be:'🍵',w:'Cascada de energía: el calor sobrante de un proceso alimenta otro.'}
+];
+function gSimbiosis(l){
+  const n=({exp:4,inv:5,est:6})[S.band||'inv'];
+  const pairs=shuffle(SIMBIOSIS).slice(0,n);
+  const left=shuffle(pairs), right=shuffle(pairs);
+  let sel=null, matched=0, tries=0;
+  gameShell(l,`
+    <div class="prompt">Tocá un <b>subproducto</b> de la izquierda y luego la <b>industria</b> que puede aprovecharlo.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+      <div><div class="eyebrow" style="margin-bottom:7px">Subproductos</div><div class="optgrid" id="colA">
+        ${left.map((p,i)=>`<div class="tile" data-a="${SIMBIOSIS.indexOf(p)}"><span class="em">${p.ae}</span>${p.a}</div>`).join('')}</div></div>
+      <div><div class="eyebrow" style="margin-bottom:7px">¿Quién lo usa?</div><div class="optgrid" id="colB">
+        ${right.map(p=>`<div class="tile" data-b="${SIMBIOSIS.indexOf(p)}"><span class="em">${p.be}</span>${p.b}</div>`).join('')}</div></div>
+    </div>
+    <div id="fb" style="margin-top:12px"></div>`);
+  setProg(0,n);
+  document.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>{
+    Snd.tap(); document.querySelectorAll('[data-a]').forEach(x=>x.classList.remove('sel'));
+    el.classList.add('sel'); sel=el; });
+  document.querySelectorAll('[data-b]').forEach(el=>el.onclick=()=>{
+    if(!sel){ toast('Elegí primero un subproducto'); return; }
+    tries++;
+    const ok=sel.dataset.a===el.dataset.b; const p=SIMBIOSIS[+el.dataset.b];
+    hit(ok);
+    if(ok){ matched++; Snd.good(); sel.classList.remove('sel'); sel.classList.add('used'); el.classList.add('used');
+      document.getElementById('fb').innerHTML=`<div class="feedback ok"><b>✔ Simbiosis lograda</b>${p.w}</div>`;
+      setProg(matched,n);
+      if(matched===n){ setTimeout(()=>finishLevel(l,n,Math.max(n,tries),
+        `Cerraste ${n} conexiones con ${tries} intentos. Cada conexión evita extraer materia prima nueva y ahorra el costo de disponer un residuo.`),900); }
+    } else { Snd.bad(); el.classList.add('no'); const s=sel; s.classList.add('no');
+      setTimeout(()=>{el.classList.remove('no');s.classList.remove('no','sel');},600);
+      document.getElementById('fb').innerHTML=`<div class="feedback no"><b>✘ Esa industria no puede usar ese material</b>Pensá qué necesita cada proceso como insumo: fibra, nutrientes, calor o energía.</div>`;
+      sel=null;
+    }
+  });
+}
+
+/* =========================================================
+   M7 · CICLO DE VIDA / LOGÍSTICA INVERSA
+   ========================================================= */
+const SEQS=[
+ {t:'Ciclo de vida de una batería de litio',e:'🔋',
+  steps:['Extracción de litio y cobalto','Fabricación de celdas','Uso en el vehículo o equipo',
+  'Segunda vida como almacenamiento estacionario','Recolección diferenciada y logística inversa',
+  'Recuperación de metales en planta','Nuevas celdas con material recuperado'],
+  w:'La segunda vida va ANTES del reciclado: mientras la batería sirva para algo, reciclarla es destruir valor.'},
+ {t:'Ciclo de una botella retornable de vidrio',e:'🍾',
+  steps:['Fabricación del envase','Llenado en la planta','Venta y consumo','Devolución del envase vacío',
+  'Lavado e inspección','Nuevo llenado del mismo envase'],
+  w:'El envase retornable hace muchos ciclos antes de fundirse: reutilizar siempre gana al reciclar.'},
+ {t:'Ciclo biológico de los restos de comida',e:'🍂',
+  steps:['Separación en origen en la cocina','Recolección diferenciada','Compostaje con verdes y marrones',
+  'Maduración del compost','Aplicación en huerta o chacra','Nuevos alimentos desde ese suelo'],
+  w:'El ciclo biológico solo cierra si vuelve al suelo: sin separación en origen, todo termina mezclado.'},
+ {t:'Ciclo de un celular en una escuela',e:'📱',
+  steps:['Compra pensada: batería reemplazable','Uso con funda y cuidado','Reparación de pantalla o batería',
+  'Reacondicionado y venta de segunda mano','Punto verde de RAEE','Recuperación de oro, cobre y tierras raras'],
+  w:'Cada paso extra de vida útil evita fabricar un equipo nuevo, que es donde está el mayor impacto.'}
+];
+function gCicloVida(l){
+  const n=({exp:2,inv:3,est:4})[S.band||'inv'];
+  const rounds=shuffle(SEQS).slice(0,Math.min(n,SEQS.length));
+  let r=0,correct=0,total=0;
+  gameShell(l,`<div id="stage"></div>`);
+  paint();
+  function paint(){
+    if(r>=rounds.length) return finishLevel(l,correct,total);
+    const R=rounds[r]; let idx=0;
+    setProg(r,rounds.length);
+    const opts=shuffle(R.steps);
+    document.querySelector('#stage').innerHTML=`
+      <div class="panel tight card-item" style="display:flex;gap:11px;align-items:center;">
+        <div style="font-size:2rem">${R.e}</div><div><div class="eyebrow">Secuencia ${r+1} de ${rounds.length}</div><b>${R.t}</b></div></div>
+      <p class="muted" style="font-size:.8rem;margin:12px 0 7px;">Tocá los pasos en el orden correcto, del principio al final.</p>
+      <div class="seq" id="seq"></div>
+      <div class="optgrid" style="grid-template-columns:1fr 1fr;margin-top:12px" id="opts">
+        ${opts.map((s,j)=>`<div class="tile" data-s="${esc(s)}">${s}</div>`).join('')}</div>
+      <div id="fb" style="margin-top:12px"></div>`;
+    document.querySelectorAll('[data-s]').forEach(el=>el.onclick=()=>{
+      const s=el.dataset.s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+      total++;
+      const ok=s===R.steps[idx]; hit(ok);
+      if(ok){ correct++; Snd.good(); el.classList.add('used');
+        document.getElementById('seq').insertAdjacentHTML('beforeend',`<span class="s">${idx+1}. ${s}</span>`);
+        idx++;
+        if(idx>=R.steps.length){
+          document.getElementById('fb').innerHTML=`<div class="feedback ok"><b>✔ Ciclo completo</b>${R.w}
+            <div style="margin-top:10px"><button class="btn sm" id="nx">Continuar →</button></div></div>`;
+          document.getElementById('nx').onclick=()=>{Snd.tap();r++;paint();};
+        }
+      } else {
+        Snd.bad(); el.classList.add('no'); setTimeout(()=>el.classList.remove('no'),500);
+        document.getElementById('fb').innerHTML=`<div class="feedback no"><b>✘ Ese paso todavía no</b>
+          Pista: el paso ${idx+1} empieza con “${R.steps[idx].slice(0,14)}…”.</div>`;
+      }
+    });
+  }
+}
+
+/* =========================================================
+   M8 · CONSEJO PROVINCIAL
+   ========================================================= */
+const POLICIES=[
+ {n:'Separación en origen obligatoria',c:35,e:{res:-14,emi:-7,emp:6,con:10},w:'Sin separar en casa, ninguna planta funciona bien. Es la base de todo el sistema.'},
+ {n:'Formalizar cooperativas de recuperadores',c:30,e:{res:-12,emi:-5,emp:16,con:6},w:'La política circular más costo-efectiva: recupera material y genera empleo digno.'},
+ {n:'Planta de compostaje regional',c:40,e:{res:-16,emi:-14,emp:8,con:3},w:'La fracción orgánica es casi la mitad de la basura: compostarla evita metano.'},
+ {n:'Responsabilidad Extendida del Productor (REP)',c:45,e:{res:-15,emi:-9,emp:7,con:8},w:'Quien pone el envase en el mercado financia su recuperación. Cambia el incentivo de raíz.'},
+ {n:'Compras públicas circulares',c:25,e:{res:-7,emi:-6,emp:9,con:7},w:'El Estado es el mayor comprador: si exige productos reparables, mueve todo el mercado.'},
+ {n:'Red provincial de talleres de reparación',c:25,e:{res:-9,emi:-5,emp:12,con:11},w:'Reparar está arriba de reciclar en la escalera de las R y crea trabajo de barrio.'},
+ {n:'Campaña educativa en escuelas',c:20,e:{res:-5,emi:-3,emp:4,con:18},w:'Sin cultura ciudadana, la infraestructura se subutiliza. Efecto lento pero duradero.'},
+ {n:'Nuevo relleno sanitario más grande',c:45,e:{res:4,emi:8,emp:3,con:-8},w:'Ampliar el enterramiento es la solución lineal: barata hoy, carísima mañana.'},
+ {n:'Incineración sin recuperación de materiales',c:50,e:{res:-10,emi:16,emp:2,con:-9},w:'Quemar sin separar destruye materiales recuperables y empeora las emisiones.'},
+ {n:'Puntos verdes para RAEE y pilas',c:20,e:{res:-6,emi:-4,emp:5,con:9},w:'Poco volumen, mucho impacto: evita que metales pesados lleguen al suelo y al agua.'}
+];
+function gConsejo(l){
+  let year=0, budget=100, chosen=[], IND={res:100,emi:100,emp:20,con:30};
+  gameShell(l,`<div id="stage"></div>`);
+  paint();
+  function indHTML(){
+    const rows=[['Residuos enterrados','res',true],['Emisiones','emi',true],['Empleo verde','emp',false],['Conciencia ciudadana','con',false]];
+    return `<div class="meters panel tight" style="margin-bottom:12px;">
+      ${rows.map(([n,k,inv])=>{ const v=Math.max(0,Math.min(100,IND[k]));
+        const good=inv?v<=60:v>=55;
+        return `<div class="meter"><span>${n}</span><span class="bar"><i style="width:${v}%;background:${good?'linear-gradient(90deg,#6FD79E,#2FA36B)':'linear-gradient(90deg,#FF9B9B,#E05656)'}"></i></span><b>${Math.round(v)}</b></div>`;
+      }).join('')}</div>`;
+  }
+  function paint(){
+    if(year>=3) return end();
+    setProg(year,3);
+    const pool=shuffle(POLICIES).slice(0,6);
+    document.querySelector('#stage').innerHTML=`${indHTML()}
+      <div class="prompt card-item"><b>Año ${year+1} de gestión</b><br>Presupuesto disponible: <b id="bud">${budget}</b> puntos. Elegí las medidas y cerrá el año.</div>
+      <div class="optgrid" style="margin-top:12px" id="pol">
+        ${pool.map((p,j)=>`<button class="opt" data-p="${POLICIES.indexOf(p)}"><span class="k">${p.c}</span>
+          <span><b>${p.n}</b><br><span class="muted" style="font-size:.78rem">Costo ${p.c} puntos</span></span></button>`).join('')}</div>
+      <button class="btn green block" style="margin-top:14px" id="close">Cerrar el año ▸</button>
+      <div id="fb" style="margin-top:12px"></div>`;
+    let sel=[];
+    document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
+      const id=+b.dataset.p, p=POLICIES[id];
+      if(sel.includes(id)){ sel=sel.filter(x=>x!==id); budget+=p.c; b.classList.remove('sel'); }
+      else { if(budget<p.c){ Snd.bad(); toast('Presupuesto insuficiente para esa medida'); return; }
+        sel.push(id); budget-=p.c; b.classList.add('sel'); Snd.coin(); }
+      document.getElementById('bud').textContent=budget;
+    });
+    document.getElementById('close').onclick=()=>{
+      if(!sel.length){ toast('Elegí al menos una medida'); return; }
+      Snd.tap();
+      sel.forEach(id=>{ const p=POLICIES[id]; Object.keys(p.e).forEach(k=>IND[k]=Math.max(0,Math.min(100,IND[k]+p.e[k]))); chosen.push(p); });
+      IND.res=Math.min(100,IND.res+3); IND.con=Math.max(0,IND.con-2); // inercia
+      budget=100;
+      document.querySelector('#stage').innerHTML=`${indHTML()}
+        <div class="panel"><div class="eyebrow">Informe del año ${year+1}</div>
+        ${sel.map(id=>{const p=POLICIES[id];const bad=p.e.emi>0||p.e.res>0;
+          return `<div class="feedback ${bad?'no':'ok'}" style="margin-top:9px"><b>${bad?'⚠':'✔'} ${p.n}</b>${p.w}</div>`;}).join('')}
+        <button class="btn block" style="margin-top:14px" id="nx">${year<2?'Pasar al año siguiente →':'Ver balance final →'}</button></div>`;
+      document.getElementById('nx').onclick=()=>{Snd.tap();year++;paint();};
+    };
+  }
+  function end(){
+    const greens=[IND.res<=60,IND.emi<=60,IND.emp>=55,IND.con>=60].filter(Boolean).length;
+    if(greens===4) grantBadge('b_gov');
+    const txt=greens===4?'Corrientes cierra la gestión como provincia modelo en economía circular.'
+      :greens>=2?'Hubo avances concretos, pero quedaron frentes abiertos para la próxima gestión.'
+      :'La gestión mantuvo la lógica lineal: mucho enterramiento y poco aprovechamiento.';
+    finishLevel(l,greens,4,`<b>${greens} de 4 indicadores en verde.</b> ${txt}<br><br>
+      Residuos ${Math.round(IND.res)} · Emisiones ${Math.round(IND.emi)} · Empleo verde ${Math.round(IND.emp)} · Conciencia ${Math.round(IND.con)}`);
+  }
+}
+
+/* =========================================================
+   GLOSARIO
+   ========================================================= */
+const GLOS=[
+ ['Economía circular','Modelo que elimina el concepto de residuo: todo material vuelve a un ciclo, biológico o técnico, conservando su valor el mayor tiempo posible.'],
+ ['Economía lineal','Extraer, fabricar, usar y tirar. El modelo dominante desde la revolución industrial.'],
+ ['Ciclo biológico','Circuito de materiales orgánicos que pueden volver al suelo como nutrientes (alimentos, madera, fibras naturales).'],
+ ['Ciclo técnico','Circuito de materiales que deben volver a la industria sin degradarse: metales, plásticos, vidrio, electrónica.'],
+ ['Las 10R','Jerarquía de estrategias: Rechazar, Repensar, Reducir, Reutilizar, Reparar, Restaurar, Refabricar, Reconvertir, Reciclar y Recuperar energía.'],
+ ['Ecodiseño','Diseñar considerando todo el ciclo de vida. Cerca del 80% del impacto ambiental de un producto se define en esta etapa.'],
+ ['Obsolescencia programada','Diseñar un producto para que falle o se vuelva obsoleto antes de tiempo, forzando la recompra.'],
+ ['Simbiosis industrial','Acuerdo entre empresas donde el subproducto de una es el insumo de otra.'],
+ ['Cascada de valor','Usar un material primero en su aplicación de mayor valor y bajar de escalón solo cuando ya no sea posible.'],
+ ['Logística inversa','Sistema que devuelve el producto usado desde el consumidor hasta la planta que lo recupera.'],
+ ['REP','Responsabilidad Extendida del Productor: quien fabrica o importa se hace cargo del producto al final de su vida útil.'],
+ ['Producto como servicio','Modelo donde se paga por el uso y no por la propiedad; al fabricante le conviene que el producto dure.'],
+ ['Separación en origen','Clasificar los residuos en el lugar donde se generan. Sin esto, los materiales se contaminan entre sí.'],
+ ['Compostaje','Descomposición controlada de materia orgánica con verdes (nitrógeno), marrones (carbono), humedad y aire.'],
+ ['Huella de carbono','Total de gases de efecto invernadero asociados a un producto, servicio o actividad.'],
+ ['RAEE','Residuos de Aparatos Eléctricos y Electrónicos. Contienen metales valiosos y sustancias peligrosas.'],
+ ['Recuperador urbano','Trabajador/a que recupera materiales reciclables. Columna vertebral del reciclado en Argentina.'],
+ ['Biodigestor','Reactor que transforma residuos orgánicos en biogás y en un digerido fertilizante.']
+];
+function renderGlossary(){
+  screen(`<div class="wrap">
+    <div class="eyebrow">Referencia</div>
+    <h2 class="display" style="font-size:1.35rem;margin-bottom:4px;">Glosario circular</h2>
+    <p class="muted" style="font-size:.84rem;margin:0 0 14px;">${GLOS.length} conceptos clave. Podés consultarlo durante el juego.</p>
+    <input type="text" id="q" placeholder="Buscar concepto…" style="margin-bottom:12px">
+    <div id="gl" class="optgrid">${GLOS.map(([t,d])=>`<div class="panel tight g" data-t="${t.toLowerCase()} ${d.toLowerCase()}">
+      <b style="color:var(--sun)">${t}</b><p style="margin:6px 0 0;font-size:.86rem;line-height:1.55">${d}</p></div>`).join('')}</div>
+  </div>`,{title:'Glosario',back:'home'});
+  document.getElementById('q').oninput=e=>{ const v=e.target.value.toLowerCase();
+    document.querySelectorAll('.g').forEach(g=>g.style.display=g.dataset.t.includes(v)?'':'none'); };
+}
+
+/* =========================================================
+   LOGROS
+   ========================================================= */
+function renderBadges(){
+  const acc=S.stats.total?Math.round(S.stats.correct/S.stats.total*100):0;
+  screen(`<div class="wrap">
+    <div class="eyebrow">Tu recorrido</div>
+    <h2 class="display" style="font-size:1.35rem;margin-bottom:12px;">Logros y estadísticas</h2>
+    <div class="panel tight" style="margin-bottom:14px;">
+      <div class="kv"><span>Misiones completadas</span><b>${Object.values(S.levels).filter(l=>l.done).length} / ${LEVELS.length}</b></div>
+      <div class="kv"><span>Estrellas</span><b>${totalStars()} / ${LEVELS.length*3}</b></div>
+      <div class="kv"><span>Puntos EcoCiclo</span><b>${S.xp} 🌱</b></div>
+      <div class="kv"><span>Precisión general</span><b>${acc}%</b></div>
+      <div class="kv"><span>Nivel elegido</span><b>${DIF().label}</b></div>
+    </div>
+    <div class="badges">${BADGES.map(b=>`<div class="badge ${S.badges.includes(b.id)?'':'off'}">
+      <span class="e">${b.e}</span><b>${b.n}</b><br><span class="muted" style="font-size:.62rem">${b.d}</span></div>`).join('')}</div>
+    <div class="divider"></div>
+    <h3 style="font-size:1rem;margin-bottom:9px;">Detalle por misión</h3>
+    <table class="tbl"><tr><th>Misión</th><th>Concepto</th><th>★</th><th>%</th></tr>
+      ${LEVELS.map(l=>{const s=lvState(l.id);return `<tr><td><b>${l.place}</b></td><td class="muted">${l.concept}</td>
+      <td class="stars" style="font-size:.85rem">${'★'.repeat(s.stars)||'—'}</td><td>${s.best||0}%</td></tr>`;}).join('')}</table>
+  </div>`,{title:'Logros',back:'home'});
+}
+
+/* =========================================================
+   MODO AULA / GUÍA DOCENTE
+   ========================================================= */
+function renderDocente(){
+  screen(`<div class="wrap">
+    <div class="eyebrow noprint">Para docentes</div>
+    <h2 class="display" style="font-size:1.4rem;margin-bottom:6px;">Guía didáctica</h2>
+    <p class="lead" style="font-size:.9rem;">EcoCiclo Corrientes es un recurso de educación ambiental para trabajar economía circular con anclaje territorial. Duración estimada: 2 a 4 módulos de 40 minutos.</p>
+    <div class="panel tight noprint" style="margin:14px 0;">
+      <div class="switch" style="border:0;padding-top:0;"><div><b>Modo aula</b><br><span class="muted" style="font-size:.76rem">Desbloquea las 8 misiones para elegir cualquiera en clase</span></div>
+      <div class="sw ${S.settings.aula?'on':''}" id="swa"><i></i></div></div>
+    </div>
+    <h3 style="font-size:1rem;margin:16px 0 8px;">Propósitos de aprendizaje</h3>
+    <ul style="font-size:.88rem;line-height:1.7;padding-left:19px;margin:0;">
+      <li>Distinguir el modelo lineal del circular y sus consecuencias ambientales y económicas.</li>
+      <li>Aplicar la jerarquía de las 10R a situaciones cotidianas y productivas.</li>
+      <li>Reconocer los ciclos biológico y técnico y el riesgo de mezclarlos.</li>
+      <li>Analizar cadenas productivas correntinas (citrícola, forestal, arrocera, ganadera) desde la valorización de subproductos.</li>
+      <li>Evaluar decisiones de diseño y de política pública considerando múltiples indicadores.</li>
+    </ul>
+    <h3 style="font-size:1rem;margin:18px 0 8px;">Secuencia de misiones</h3>
+    <table class="tbl"><tr><th>#</th><th>Misión</th><th>Contenido</th><th>Pregunta para debatir</th></tr>
+      ${LEVELS.map((l,i)=>`<tr><td>${i+1}</td><td><b>${l.place}</b><br><span class="muted">${l.name}</span></td>
+        <td>${l.concept}</td><td class="muted">${DEBATE[i]}</td></tr>`).join('')}</table>
+    <h3 style="font-size:1rem;margin:18px 0 8px;">Propuesta de trabajo posterior</h3>
+    <ol style="font-size:.88rem;line-height:1.7;padding-left:19px;margin:0;">
+      <li><b>Auditoría de residuos escolar:</b> pesar durante una semana lo que descarta la escuela y clasificarlo en ciclo biológico y técnico.</li>
+      <li><b>Mapa circular del barrio:</b> identificar talleres de reparación, puntos verdes, ferias de usados y cooperativas cercanas.</li>
+      <li><b>Rediseño de un producto:</b> tomar un objeto del aula y rediseñarlo aplicando los criterios de la misión 4.</li>
+      <li><b>Simulacro de concejo deliberante:</b> defender por grupos las políticas de la misión 8 con presupuesto acotado.</li>
+    </ol>
+    <div class="divider"></div>
+    <div class="noprint" style="display:flex;gap:9px;flex-wrap:wrap;">
+      <button class="btn sm" onclick="window.print()">🖨 Imprimir guía</button>
+      <button class="btn ghost sm" data-go="home">Volver</button>
+    </div>
+  </div>`,{title:'Guía docente',back:'home'});
+  document.getElementById('swa').onclick=function(){ S.settings.aula=!S.settings.aula; this.classList.toggle('on'); save(); Snd.tap();
+    toast(S.settings.aula?'Modo aula activado':'Modo aula desactivado'); };
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
+}
+const DEBATE=[
+ '¿Qué objetos de tu casa mezclan materiales biológicos y técnicos y por eso no se pueden reciclar?',
+ '¿Qué se rompe seguido en la escuela y nadie repara? ¿Por qué?',
+ '¿Qué se descarta en la producción de tu zona y podría tener un uso de mayor valor?',
+ '¿Qué producto comprarían si se alquilara en vez de venderse?',
+ '¿Cuánto de la basura de la escuela es orgánico? ¿Dónde podría ir?',
+ '¿Qué dos actividades productivas de Corrientes podrían asociarse y por qué?',
+ '¿Dónde terminan hoy las pilas y celulares de sus casas?',
+ 'Si tuvieran el presupuesto provincial, ¿qué medida elegirían primero y qué dejarían afuera?'
+];
+
+/* =========================================================
+   DESAFÍO FINAL Y CERTIFICADO
+   ========================================================= */
+const FINALQ=[
+ {q:'¿Cuál es la diferencia central entre economía lineal y circular?',o:['La circular usa energía solar','La circular mantiene los materiales en uso y elimina la idea de residuo','La lineal es más cara','La circular solo recicla'],c:1},
+ {q:'¿Qué estrategia está MÁS ARRIBA en la escalera de las R?',o:['Reciclar','Recuperar energía','Repensar el modelo de uso','Refabricar'],c:2},
+ {q:'Una remera de poliéster pertenece al…',o:['Ciclo biológico','Ciclo técnico','A ninguno','A los dos por igual'],c:1},
+ {q:'En una cascada de valor, la naranja de descarte sana debería ir primero a…',o:['Compost','Alimento humano','Biogás','Relleno sanitario'],c:1},
+ {q:'¿Qué decisión de diseño hace IMPOSIBLE reparar un producto?',o:['Tornillos accesibles','Mono-material','Pegado permanente','Manual público'],c:2},
+ {q:'En una compostera, los "marrones" aportan sobre todo…',o:['Nitrógeno','Carbono y estructura','Humedad','Metales'],c:1},
+ {q:'La simbiosis industrial consiste en…',o:['Fusionar dos empresas','Que el subproducto de una empresa sea insumo de otra','Compartir empleados','Vender residuos al exterior'],c:1},
+ {q:'La REP significa que…',o:['El municipio paga todo','El consumidor paga una multa','Quien produce se hace cargo del producto al final de su vida','Se prohíben los envases'],c:2},
+ {q:'¿Por qué la segunda vida de una batería va ANTES del reciclado?',o:['Porque es más barato enterrarla','Porque mientras sirva, reciclarla destruye valor','Porque el reciclado es ilegal','Porque no se puede reciclar'],c:1},
+ {q:'¿Cuál de estas es la política circular más costo-efectiva según lo visto?',o:['Ampliar el relleno sanitario','Incinerar sin separar','Formalizar a los recuperadores urbanos','Importar tecnología'],c:2},
+ {q:'El aserrín de los aserraderos de Santo Tomé puede convertirse en…',o:['Tableros, pellets y sustrato','Solamente basura','Vidrio','Aluminio'],c:0},
+ {q:'¿Cuándo se define la mayor parte del impacto ambiental de un producto?',o:['Al transportarlo','En la etapa de diseño','Al comprarlo','Al tirarlo'],c:1}
+];
+function renderFinalChallenge(){
+  const qs=shuffle(FINALQ).slice(0,10); let i=0,ok=0;
+  paint();
+  function paint(){
+    if(i>=qs.length) return end();
+    const q=qs[i], opts=q.o.map((t,j)=>({t,j}));
+    screen(`<div class="wrap narrow">
+      <div class="gamehead"><span class="chip gold">🏆 Desafío final</span><span class="chip">Pregunta ${i+1}/${qs.length}</span></div>
+      <div class="bar thin" style="margin-bottom:14px"><i style="width:${i/qs.length*100}%"></i></div>
+      <div class="prompt card-item"><b>${q.q}</b></div>
+      <div class="optgrid" style="margin-top:12px">${shuffle(opts).map(o=>`<button class="opt" data-j="${o.j}"><span class="k">${'ABCD'[o.j]}</span><span>${o.t}</span></button>`).join('')}</div>
+      <div id="fb" style="margin-top:12px"></div>`,{title:'Desafío final',back:'map'});
+    document.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{
+      const good=+b.dataset.j===q.c; if(good){ok++;Snd.good();}else Snd.bad();
+      document.querySelectorAll('[data-j]').forEach(x=>{x.style.pointerEvents='none';
+        if(+x.dataset.j===q.c)x.classList.add('ok'); else if(x===b)x.classList.add('no'); else x.classList.add('dim');});
+      document.getElementById('fb').innerHTML=`<div class="feedback ${good?'ok':'no'}"><b>${good?'✔ Correcto':'✘ Incorrecto'}</b>
+        Respuesta correcta: ${q.o[q.c]}.<div style="margin-top:10px"><button class="btn sm" id="nx">Continuar →</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{Snd.tap();i++;paint();};
+    });
+  }
+  function end(){
+    const pct=Math.round(ok/qs.length*100), pass=pct>=70;
+    if(pass){ S.done=true; grantBadge('b_cert'); addXP(200); save(); confetti(110); Snd.win(); } else Snd.lose();
+    screen(`<div class="wrap narrow center" style="padding-top:30px">
+      <div class="panel" style="text-align:center;width:100%">
+        <div style="font-size:2.8rem">${pass?'🎓':'📚'}</div>
+        <h2 class="display" style="font-size:1.4rem;margin-top:8px">${pass?'¡Aprobado!':'Todavía no'}</h2>
+        <p class="lead" style="font-size:.92rem">${ok} de ${qs.length} correctas (${pct}%). ${pass?'Ya podés emitir tu certificado de Agente Circular de Corrientes.':'Necesitás 70% para aprobar. Repasá el glosario y volvé a intentarlo.'}</p>
+        <div style="display:grid;gap:9px;margin-top:14px">
+          ${pass?'<button class="btn block" data-go="cert">📜 Ver mi certificado</button>':''}
+          <button class="btn ${pass?'ghost':''} block" id="rt">↻ Volver a intentar</button>
+          <button class="btn ghost block sm" data-go="map">Volver al mapa</button>
+        </div>
+      </div></div>`,{title:'Resultado final',back:'map'});
+    document.getElementById('rt').onclick=()=>{Snd.tap();renderFinalChallenge();};
+    document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
+  }
+}
+function renderCert(){
+  const nm=S.certName||S.name||'Agente Circular';
+  const f=new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
+  screen(`<div class="wrap narrow">
+    <div class="cert" id="certBox">
+      <div style="font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:#7A6236">EcoCiclo · Provincia de Corrientes</div>
+      <h2 style="margin-top:8px">Certificado de Agente Circular</h2>
+      <p style="font-size:.85rem;margin:14px 0 0;color:#3B5A55">Se otorga a</p>
+      <div class="nm">${esc(nm)}</div>
+      <p style="font-size:.86rem;line-height:1.6;margin:12px auto 0;max-width:420px;color:#2A4A46">
+        por completar las ocho misiones de la Ruta Circular y aprobar el desafío final sobre economía circular
+        aplicada al territorio correntino, alcanzando ${totalStars()} de ${LEVELS.length*3} estrellas y ${S.xp} puntos EcoCiclo.</p>
+      <div style="display:flex;justify-content:space-around;margin-top:22px;font-size:.72rem;color:#3B5A55">
+        <div>${f}<div style="border-top:1px solid #C9A45B;margin-top:5px;padding-top:4px">Fecha</div></div>
+        <div>🌿<div style="border-top:1px solid #C9A45B;margin-top:5px;padding-top:4px">EcoCiclo Corrientes</div></div>
+      </div>
+    </div>
+    <div class="noprint" style="margin-top:14px;display:grid;gap:9px">
+      <input type="text" id="cn" placeholder="Escribí tu nombre completo" value="${esc(nm==='Agente Circular'?'':nm)}">
+      <button class="btn green block" id="upd">Actualizar nombre</button>
+      <button class="btn block" onclick="window.print()">🖨 Imprimir o guardar en PDF</button>
+      <button class="btn ghost block sm" data-go="map">Volver al mapa</button>
+    </div></div>`,{title:'Certificado',back:'map'});
+  document.getElementById('upd').onclick=()=>{ S.certName=document.getElementById('cn').value.trim(); save(); Snd.good(); renderCert(); };
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
+}
+
+/* =========================================================
+   ARRANQUE
+   ========================================================= */
+load();
+document.body.classList.toggle('dys',!!S.settings.dys);
+renderHome();
 </script>
 </body>
 </html>
