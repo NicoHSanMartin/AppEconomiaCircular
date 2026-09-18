@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EcoCiclo: La Aventura Circular</title>
+<title>EcoCiclo — La Aventura Circular | Corrientes</title>
 <style>
   :root{
     --azul:#1CA7EC; --azul2:#0E7FB8; --verde:#3FBF7F; --verde2:#279A5F;
@@ -121,6 +121,101 @@
   .cine-sun{position:absolute;top:14%;left:12%;width:70px;height:70px;border-radius:50%;
     background:radial-gradient(circle,#FFE59A,#FFC93C 70%);box-shadow:0 0 40px 10px rgba(255,201,60,.55);animation:bob 4s ease-in-out infinite;}
   .cine-leaf{position:absolute;animation:bob 5s ease-in-out infinite;}
+
+  /* ====== ECOCICLO PRO UI REFRESH ====== */
+  :root{
+    --ink:#102A43; --muted:#587087; --surface:rgba(255,255,255,.94);
+    --surface2:rgba(255,255,255,.78); --line:rgba(16,42,67,.10);
+    --shadow:0 18px 45px rgba(7,37,52,.22);
+    --shadow-sm:0 8px 20px rgba(7,37,52,.16);
+    --radius-xl:32px; --radius-lg:24px; --radius-md:18px;
+  }
+  html,body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#071f2a;}
+  body{letter-spacing:-.01em;}
+  .screen{padding:24px;justify-content:center;}
+  .screen.hud{padding-top:calc(var(--topbar-h) + 20px);}
+  h1{font-size:clamp(2.4rem,6vw,4.8rem);line-height:.95;letter-spacing:-.055em;font-weight:900;text-shadow:0 8px 25px rgba(0,0,0,.18);}
+  h2{font-size:clamp(1.35rem,3vw,2rem);font-weight:850;letter-spacing:-.035em;}
+  p.sub{font-size:1rem;line-height:1.55;max-width:620px;color:#eafaf6;}
+  .card{
+    background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(247,252,250,.94));
+    border:1px solid rgba(255,255,255,.7); border-radius:var(--radius-xl);
+    padding:28px; box-shadow:var(--shadow); backdrop-filter:blur(16px);
+    max-width:720px;
+  }
+  .btn{
+    border-radius:15px; padding:14px 22px; min-width:170px;
+    font-size:.98rem; font-weight:800; letter-spacing:.01em;
+    box-shadow:0 5px 0 #c98a00,0 10px 22px rgba(0,0,0,.12);
+    transition:transform .15s ease,filter .15s ease,box-shadow .15s ease;
+  }
+  .btn:hover{filter:brightness(1.04);transform:translateY(-2px);}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #c98a00,0 4px 10px rgba(0,0,0,.12);}
+  .btn.green{box-shadow:0 5px 0 var(--verde2),0 10px 22px rgba(0,0,0,.12);}
+  .btn.blue{box-shadow:0 5px 0 var(--azul2),0 10px 22px rgba(0,0,0,.12);}
+  .btn.pink{box-shadow:0 5px 0 #c24870,0 10px 22px rgba(0,0,0,.12);}
+  .rowbtns{gap:12px;}
+  #topbar{
+    height:76px;padding:12px 18px;gap:10px;
+    background:linear-gradient(180deg,rgba(5,29,39,.78),rgba(5,29,39,.08));
+    backdrop-filter:blur(8px);
+  }
+  .pill{
+    border:1px solid rgba(255,255,255,.55); border-radius:14px;padding:8px 12px;
+    box-shadow:0 6px 16px rgba(0,0,0,.16);font-size:.88rem;
+  }
+  .iconbtn{
+    width:44px;height:44px;border-radius:14px;font-size:1.05rem;
+    box-shadow:0 6px 16px rgba(0,0,0,.16);transition:.15s ease;
+  }
+  .iconbtn:hover{transform:translateY(-2px);}
+  #hud-avatar{display:flex;align-items:center;margin-right:auto;}
+  .avatar-opt{
+    width:104px;height:104px;border-radius:26px;border:2px solid rgba(255,255,255,.7);
+    box-shadow:var(--shadow-sm);transition:.18s ease;
+  }
+  .avatar-opt:hover{transform:translateY(-4px) scale(1.02);}
+  .avatar-opt.selected{border-color:var(--amarillo);box-shadow:0 0 0 5px rgba(255,201,60,.24),var(--shadow-sm);transform:translateY(-3px);}
+  .age-card{
+    width:190px;margin:8px;border:2px solid transparent;border-radius:24px;
+    transition:.18s ease;
+  }
+  .age-card:hover{transform:translateY(-5px);box-shadow:0 14px 28px rgba(0,0,0,.18);}
+  .age-card.selected{border-color:var(--verde);box-shadow:0 0 0 5px rgba(63,191,127,.16),var(--shadow-sm);}
+  .progressbar{height:10px;background:#dcece6;border-radius:99px;width:100%;overflow:hidden;}
+  .progressbar>div{background:linear-gradient(90deg,#3fbf7f,#1ca7ec);border-radius:99px;}
+  .timerbar{height:9px;background:rgba(255,255,255,.42);border-radius:99px;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+  .timerbar>div{background:linear-gradient(90deg,#ffcc4d,#ff704f);border-radius:99px;}
+  .quiz-opt{
+    border:1px solid var(--line);border-radius:15px;padding:14px 16px;
+    box-shadow:0 5px 14px rgba(16,42,67,.07);font-weight:650;transition:.14s ease;
+  }
+  .quiz-opt:hover{transform:translateX(3px);border-color:#8acdb0;}
+  .toast{top:11%;border-radius:14px;padding:12px 18px;box-shadow:var(--shadow-sm);}
+  .map-node{
+    width:92px;height:92px;border:4px solid rgba(255,255,255,.95);
+    box-shadow:0 10px 24px rgba(0,0,0,.25);transition:transform .18s ease,filter .18s ease;
+  }
+  .map-node:not(.locked):hover{transform:scale(1.08);}
+  .map-node .badge{bottom:-12px;border-radius:9px;padding:3px 8px;font-size:.62rem;box-shadow:0 4px 10px rgba(0,0,0,.14);}
+  .map-node.locked{opacity:.72;}
+  .dropzone{border-width:3px;border-radius:22px;background:rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
+  .draggable{transition:transform .12s ease;box-shadow:0 12px 24px rgba(0,0,0,.16)!important;}
+  .draggable:active{transform:scale(1.05);}
+  .cine-wave{opacity:.55;}
+  .cine-sun{opacity:.9;}
+  @media(max-width:680px){
+    :root{--topbar-h:66px;}
+    #topbar{height:66px;padding:9px 10px;}
+    .pill{padding:7px 9px;font-size:.8rem;}
+    .iconbtn{width:38px;height:38px;border-radius:12px;}
+    .card{padding:22px;border-radius:26px;}
+    .avatar-opt{width:82px;height:82px;border-radius:22px;}
+    .age-card{width:150px;padding:14px 12px;}
+    .map-node{width:78px;height:78px;}
+    .map-node .badge{font-size:.55rem;}
+  }
+
 </style>
 </head>
 <body>
@@ -130,9 +225,9 @@
     <div class="pill">💧 <span id="hud-drops">0</span></div>
     <div class="pill">⭐ <span id="hud-stars">0</span></div>
     <div id="hud-hints"></div>
-    <button class="iconbtn" id="btn-store">🛍️</button>
-    <button class="iconbtn" id="btn-sound">🔊</button>
-    <button class="iconbtn" id="btn-home">🏠</button>
+    <button class="iconbtn" id="btn-store" title="Recompensas" aria-label="Abrir recompensas">🛍️</button>
+    <button class="iconbtn" id="btn-sound" title="Sonido" aria-label="Activar o desactivar sonido">🔊</button>
+    <button class="iconbtn" id="btn-home" title="Mapa" aria-label="Volver al mapa">🏠</button>
   </div>
   <div id="stage"></div>
 </div>
@@ -285,7 +380,8 @@ function renderStore(){
     </div>`;
   }).join('');
   show(`
-    <h2>Mercadito de los Esteros 🛍️</h2>
+    <h2>Centro de recompensas 🛍️</h2>
+     <div style="font-size:.8rem;color:#587087;font-weight:700;">Personalizá tu aventura con lo que ganaste jugando.</div>
     <p class="sub" style="margin:0 0 8px;">Canjeá tus gotas 💧 por sorpresas.</p>
     <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:10px;">
       ${avatarChipHTML(56)}
@@ -347,7 +443,10 @@ function renderTitle(){
       <path d="M42 82 l6 6 l10 -12" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <h1>EcoCiclo<br><span style="font-size:.55em;">La Aventura Circular</span></h1>
-    <p class="sub">Ayudá a tu comunidad a cerrar el ciclo: nada se tira, todo se transforma. ¡Vamos!</p>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0 14px;">
+      <span class="pill">♻️ Economía circular</span><span class="pill">🌿 Corrientes</span><span class="pill">🎮 Aprendé jugando</span>
+    </div>
+    <p class="sub">Una aventura interactiva para descubrir cómo cuidar el agua, reducir residuos, reparar, reutilizar y elegir energía responsable.</p>
     <button class="btn green" id="start">▶ Jugar</button>
   `,{sky:true});
   document.getElementById('start').onclick = ()=>{ AudioX.click(); renderAvatarPick(); };
@@ -424,7 +523,11 @@ function renderMap(){
   show(`
     <div id="mapscroll">
       <div style="position:sticky;top:0;z-index:5;text-align:center;padding:6px 0 2px;pointer-events:none;">
-        <h2 style="margin:0;text-shadow:0 2px 6px rgba(0,0,0,.45);">Mapa de Corrientes 🌿</h2>
+        <h2 style="margin:0;text-shadow:0 2px 6px rgba(0,0,0,.45);">Tu ruta circular 🌿</h2>
+        <div style="display:flex;justify-content:center;gap:8px;margin-top:5px;flex-wrap:wrap;">
+          <span class="pill" style="background:rgba(255,255,255,.9);font-size:.75rem;">${unlocked}/${LEVELS.length} destinos</span>
+          <span class="pill" style="background:rgba(255,255,255,.9);font-size:.75rem;">${Object.values(State.stars).reduce((a,b)=>a+b,0)} ⭐ conseguidas</span>
+        </div>
       </div>
       <div id="mapcanvas" style="height:${CH}px;">${nodes}</div>
     </div>
@@ -474,7 +577,8 @@ function startLevel(id){
     <div class="card" style="position:relative;z-index:2;">
       <div style="font-size:3.4em;animation:bob 3s ease-in-out infinite;">${lv.icon}</div>
       <h2>${lv.name}</h2>
-      <p class="sub">${LEVEL_INTROS[id]}</p>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:#eef8f4;border:1px solid #d6eee4;color:#276b51;border-radius:999px;padding:7px 11px;font-size:.78rem;font-weight:800;margin:4px 0 12px;">${lv.theme}</div>
+       <p class="sub" style="color:var(--ink);text-shadow:none;margin-bottom:16px;">${LEVEL_INTROS[id]}</p>
       <button class="btn green" id="playbtn">¡A jugar! 🚀</button>
     </div>
   `,{sky:true, hud:true});
@@ -491,7 +595,11 @@ function finishLevel(id, success, starsEarned){
       <div class="card">
         <div style="font-size:3em;">${'⭐'.repeat(starsEarned)}${'☆'.repeat(3-starsEarned)}</div>
         <h2>¡Muy bien hecho!</h2>
-        <p class="sub">Ganaste ${starsEarned*10} gotas 💧 por tu esfuerzo circular.</p>
+        <p class="sub" style="color:var(--ink);text-shadow:none;">Ganaste <b>${starsEarned*10} gotas 💧</b> por tu esfuerzo circular.</p>
+         <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px 0;">
+           <span class="pill">⭐ ${starsEarned}/3 estrellas</span>
+           <span class="pill">💧 +${starsEarned*10} gotas</span>
+         </div>
         <div class="rowbtns">
           <button class="btn blue" id="tomap">Mapa 🗺️</button>
           <button class="btn green" id="retry">Repetir 🔁</button>
@@ -851,7 +959,5 @@ function makeDraggable(el, onDrop, zoneIds){
 /* ============ INICIO ============ */
 renderTitle();
 </script>
-</body>
-</html>
 </body>
 </html>
