@@ -559,12 +559,12 @@ const LEVELS=[
   goal:'Elegí el destino de MAYOR valor posible para cada subproducto.',
   data:'Bella Vista y Mburucuyá concentran buena parte de la producción citrícola correntina. De cada naranja industrializada, más de la mitad del peso es cáscara, semilla y bagazo: aceites esenciales, pectina y alimento animal salen de allí.'},
 
- {id:'m4',icon:'🏭',place:'Goya',name:'La mesa de ecodiseño',game:'ecodiseno',
-  concept:'Ecodiseño y modelos de negocio circulares',
-  hint:'Vas a diseñar desde cero un producto que dure, se repare y vuelva a la industria.',
-  brief:'El <b>80% del impacto ambiental de un producto se define en la etapa de diseño</b>. Materiales, forma de unir las piezas, repuestos y modelo de negocio deciden si el producto vivirá 20 años o irá al basural en 2.',
-  goal:'Tomá 5 decisiones de diseño para una heladerita térmica correntina. Buscá el mejor equilibrio.',
-  data:'La obsolescencia programada acorta la vida útil a propósito. La Unión Europea ya obliga a que celulares y electrodomésticos tengan repuestos disponibles y batería reemplazable.'},
+ {id:'m4',icon:'🧩',place:'Goya',name:'Memoria circular',game:'terminos',
+  concept:'Repaso integrador de vocabulario',
+  hint:'Una parada tranquila, sin reloj: relacioná cada palabra con su definición.',
+  brief:'Repasemos con calma. Tocá una palabra y después su definición para formar la pareja correcta.',
+  goal:'Relacioná las 8 palabras con su definición.',
+  data:'Goya es conocida por su Carnaval y por su producción citrícola y ganadera. Un buen lugar para hacer una pausa y repasar.'},
 
  {id:'m5',icon:'🌾',place:'Colonia Carlos Pellegrini',name:'El corazón del Iberá',game:'compost',
   concept:'Ciclo biológico: compostaje y nutrientes',
@@ -580,12 +580,12 @@ const LEVELS=[
   goal:'Conectá cada subproducto con la industria que puede aprovecharlo.',
   data:'Corrientes es la principal provincia forestal del país por superficie implantada de pino y eucalipto. El aserrín, la corteza y el chip son subproductos con destino energético, de tableros y de sustratos.'},
 
- {id:'m7',icon:'⚡',place:'Ituzaingó',name:'Ciclo de vida técnico',game:'ciclovida',
-  concept:'Ciclo de vida y logística inversa',
-  hint:'Junto a Yacyretá vas a seguir la vida completa de la energía y sus materiales.',
-  brief:'Los materiales técnicos deben volver. La <b>logística inversa</b> es el camino de regreso del producto usado hasta la planta que lo recupera. Sin ese camino, la circularidad es solo una idea.',
-  goal:'Ordená correctamente cada ciclo de vida, de principio a fin.',
-  data:'Una batería de litio bien gestionada permite recuperar más del 90% de su níquel, cobalto y cobre. Mal descartada, una sola pila puede contaminar miles de litros de agua.'},
+ {id:'m7',icon:'🔤',place:'Ituzaingó',name:'Sopa de palabras circulares',game:'sopa',
+  concept:'Vocabulario de economía circular',
+  hint:'Junto a Yacyretá, un juego relajado sin reloj: encontrá las palabras escondidas.',
+  brief:'Busquemos en la grilla las palabras clave que ya conocés, en cualquier dirección: arriba, al costado o en diagonal.',
+  goal:'Encontrá todas las palabras de la lista.',
+  data:'Ituzaingó alberga la represa de Yacyretá, una de las mayores centrales hidroeléctricas del país, compartida con Paraguay.'},
 
  {id:'m8',icon:'🏛️',place:'Consejo Provincial',name:'Decisiones de provincia',game:'consejo',
   concept:'Políticas públicas circulares',
@@ -598,6 +598,7 @@ LEVELS[0].x=22;LEVELS[0].y=12; LEVELS[1].x=34;LEVELS[1].y=24;
 LEVELS[2].x=24;LEVELS[2].y=40; LEVELS[3].x=20;LEVELS[3].y=55;
 LEVELS[4].x=52;LEVELS[4].y=57; LEVELS[5].x=80;LEVELS[5].y=63;
 LEVELS[6].x=72;LEVELS[6].y=32; LEVELS[7].x=48;LEVELS[7].y=14;
+
 
 const BADGES=[
  {id:'b_start',e:'🚩',n:'Primer paso',d:'Completaste tu primera misión'},
@@ -613,9 +614,9 @@ const BADGES=[
 ];
 
 /* ---------------- Dificultad ---------------- */
-function DIF(){ return {exp:{rounds:6,time:0,label:'Explorador/a'},
-  inv:{rounds:8,time:22,label:'Investigador/a'},
-  est:{rounds:10,time:15,label:'Estratega'}}[S.band||'inv']; }
+function DIF(){ return {exp:{rounds:5,time:0,label:'Explorador/a'},
+  inv:{rounds:6,time:45,label:'Investigador/a'},
+  est:{rounds:8,time:30,label:'Estratega'}}[S.band||'inv']; }
 
 /* ---------------- Briefing ---------------- */
 function renderBriefing(l){
@@ -720,8 +721,9 @@ function hit(ok){ if(ok){streak++; if(streak>=5) grantBadge('b_streak');} else s
    DISPATCHER
    ========================================================= */
 function runGame(l){ streak=0;
-  ({ciclos:gCiclos,escalera:gEscalera,cascada:gCascada,ecodiseno:gEcodiseno,
-    compost:gCompost,simbiosis:gSimbiosis,ciclovida:gCicloVida,consejo:gConsejo}[l.game])(l); }
+  ({ciclos:gCiclos,escalera:gEscalera,cascada:gCascada,
+    compost:gCompost,simbiosis:gSimbiosis,consejo:gConsejo,
+    sopa:gSopa,terminos:gTerminos}[l.game])(l); }
 
 /* =========================================================
    M1 · CICLO BIOLÓGICO vs TÉCNICO
@@ -824,7 +826,7 @@ function gEscalera(l){
     setProg(i,cases.length);
     const c=cases[i];
     const bestIdx=R_SCALE.findIndex(r=>r.k===c.best);
-    const distract=shuffle(R_SCALE.filter(r=>r.k!==c.best && Math.abs(R_SCALE.indexOf(r)-bestIdx)<=6)).slice(0,3);
+    const distract=shuffle(R_SCALE.filter(r=>r.k!==c.best)).slice(0,3);
     const opts=shuffle([R_SCALE[bestIdx],...distract]);
     document.querySelector('#stage').innerHTML=`
       <div class="prompt card-item"><b>Situación</b><br>${c.t}</div>
@@ -1012,12 +1014,13 @@ const COMPOST_POOL=[
 function gCompost(l){
   const rounds=DIF().rounds; let cn=50,hum=50,i=0,correct=0,perfect=true;
   gameShell(l,`<div id="stage"></div>`);
+  const TAG={verde:'🟢 Aporta nitrógeno (verde)',marron:'🟤 Aporta carbono (marrón)',agua:'💧 Aporta humedad',aire:'🌬️ Airea y seca un poco'};
   const dist=(a,b)=>Math.abs(a-50)+Math.abs(b-50);
-  function zone(v){ return v>=38&&v<=62; }
+  function zone(v){ return v>=22&&v<=78; }
   paint();
   function gauges(){
     const g=(label,v,lo,hi)=>`<div class="meter"><span>${label}</span>
-      <span class="bar" style="position:relative;background:linear-gradient(90deg,#FF6B6B 0%,#FF6B6B 30%,#3FD08A 38%,#3FD08A 62%,#FF6B6B 70%,#FF6B6B 100%);opacity:.9">
+      <span class="bar" style="position:relative;background:linear-gradient(90deg,#FF6B6B 0%,#FF6B6B 18%,#3FD08A 22%,#3FD08A 78%,#FF6B6B 82%,#FF6B6B 100%);opacity:.9">
       <i style="width:2px;margin-left:calc(${Math.max(0,Math.min(100,v))}% - 1px);background:#fff;height:100%;box-shadow:0 0 8px #fff"></i></span>
       <b style="color:${zone(v)?'#7FE7B4':'#FFB4B4'}">${Math.round(v)}</b></div>
       <div class="muted" style="font-size:.67rem;margin:-4px 0 4px 113px">${lo} ← → ${hi}</div>`;
@@ -1033,22 +1036,23 @@ function gCompost(l){
       return finishLevel(l,correct,rounds,est);
     }
     setProg(i,rounds);
-    hum-=4; // evaporación
+    hum-=2; // evaporación, más suave
     const pool=shuffle(COMPOST_POOL);
     const bad=pool.find(p=>p.t==='no');
     const opts=shuffle([...pool.filter(p=>p.t!=='no').slice(0,2), ...(Math.random()<.5?[bad]:[pool.filter(p=>p.t!=='no')[2]])]);
-    const results=opts.map(o=>o.t==='no'?9999:dist(cn+o.cn,hum+o.hum));
-    const best=Math.min(...results);
     document.querySelector('#stage').innerHTML=`${gauges()}
-      <div class="prompt card-item">Semana ${i+1}: ¿qué agregás o hacés hoy para mantener las dos barras en verde?</div>
+      <div class="prompt card-item">Semana ${i+1}: mirá los medidores de arriba. ¿Qué le agregás o hacés a la pila hoy?</div>
       <div class="optgrid" style="grid-template-columns:repeat(3,1fr);margin-top:12px">
-        ${opts.map((o,j)=>`<div class="tile" data-j="${j}"><span class="em">${o.e}</span>${o.n}</div>`).join('')}</div>
+        ${opts.map((o,j)=>`<div class="tile" data-j="${j}"><span class="em">${o.e}</span>${o.n}
+          <div class="muted" style="font-size:.63rem;margin-top:4px;font-weight:600">${o.t==='no'?'':TAG[o.t]}</div></div>`).join('')}</div>
       <div id="fb" style="margin-top:12px"></div>`;
     document.querySelectorAll('[data-j]').forEach(el=>el.onclick=()=>{
       const j=+el.dataset.j,o=opts[j];
-      const ok=o.t!=='no'&&results[j]<=best+2;
+      // acierto: cualquier ingrediente razonable que no empeore gravemente el balance
+      const cnAfter=Math.max(0,Math.min(100,cn+o.cn)), humAfter=Math.max(0,Math.min(100,hum+o.hum));
+      const ok = o.t!=='no' && zone(cnAfter) && zone(humAfter);
       hit(ok); if(ok){correct++;Snd.good();}else{Snd.bad();perfect=false;}
-      if(o.t!=='no'){ cn=Math.max(0,Math.min(100,cn+o.cn)); hum=Math.max(0,Math.min(100,hum+o.hum)); }
+      if(o.t!=='no'){ cn=cnAfter; hum=humAfter; }
       else { hum=Math.max(0,hum-6); }
       document.querySelectorAll('[data-j]').forEach(x=>{x.style.pointerEvents='none';
         if(+x.dataset.j===j) x.classList.add(ok?'ok':'no');});
@@ -1075,7 +1079,7 @@ const SIMBIOSIS=[
  {a:'Calor residual de caldera',ae:'♨️',b:'Secadero de yerba y té',be:'🍵',w:'Cascada de energía: el calor sobrante de un proceso alimenta otro.'}
 ];
 function gSimbiosis(l){
-  const n=({exp:4,inv:5,est:6})[S.band||'inv'];
+  const n=({exp:3,inv:4,est:5})[S.band||'inv'];
   const pairs=shuffle(SIMBIOSIS).slice(0,n);
   const left=shuffle(pairs), right=shuffle(pairs);
   let sel=null, matched=0, tries=0;
@@ -1133,7 +1137,7 @@ const SEQS=[
   w:'Cada paso extra de vida útil evita fabricar un equipo nuevo, que es donde está el mayor impacto.'}
 ];
 function gCicloVida(l){
-  const n=({exp:2,inv:3,est:4})[S.band||'inv'];
+  const n=({exp:2,inv:2,est:3})[S.band||'inv'];
   const rounds=shuffle(SEQS).slice(0,Math.min(n,SEQS.length));
   let r=0,correct=0,total=0;
   gameShell(l,`<div id="stage"></div>`);
@@ -1439,6 +1443,132 @@ function renderCert(){
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{Snd.tap();go(b.dataset.go);});
 }
 
+/* =========================================================
+   M9 · SOPA DE PALABRAS
+   ========================================================= */
+const SOPA_PALABRAS=['RECICLAR','COMPOST','REPARAR','CIRCULAR','CASCADA','SIMBIOSIS','ECODISEÑO','RESIDUO'];
+function gSopa(l){
+  const dificil = S.band==='est';
+  const palabras = dificil ? SOPA_PALABRAS.slice(0,7) : SOPA_PALABRAS.slice(0,5);
+  const N = dificil ? 13 : 11;
+  let grid, found=new Set(), dragging=false, path=[];
+  function intentar(){
+    grid = Array.from({length:N},()=>Array(N).fill(''));
+    const dirs = [[1,0],[0,1],[1,1],[-1,1]];
+    const coloc=[];
+    for(const w of palabras){
+      let ok=false;
+      for(let t=0;t<200&&!ok;t++){
+        const [dx,dy]=dirs[(Math.random()*dirs.length)|0];
+        const x0=(Math.random()*N)|0, y0=(Math.random()*N)|0;
+        const x1=x0+dx*(w.length-1), y1=y0+dy*(w.length-1);
+        if(x1<0||x1>=N||y1<0||y1>=N) continue;
+        let cabe=true;
+        for(let i=0;i<w.length;i++){ const c=grid[y0+dy*i][x0+dx*i]; if(c&&c!==w[i]){cabe=false;break;} }
+        if(!cabe) continue;
+        for(let i=0;i<w.length;i++) grid[y0+dy*i][x0+dx*i]=w[i];
+        coloc.push({w,x0,y0,dx,dy}); ok=true;
+      }
+    }
+    const AB='ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';
+    for(let y=0;y<N;y++) for(let x=0;x<N;x++) if(!grid[y][x]) grid[y][x]=AB[(Math.random()*AB.length)|0];
+    return coloc;
+  }
+  const coloc = intentar();
+  gameShell(l,`<div id="stage"></div>`);
+  document.getElementById('prog').textContent='Sin reloj';
+  document.getElementById('pbar').style.width='0%';
+  paint();
+  function paint(){
+    const cellPx = dificil?26:30;
+    document.querySelector('#stage').innerHTML=`
+      <div class="prompt">Tocá y arrastrá sobre las letras para formar cada palabra. Podés ir en cualquier dirección.</div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin:12px 0" id="lista">
+        ${palabras.map(w=>`<span class="chip ${found.has(w)?'green':''}" data-w="${w}">${found.has(w)?'✔ ':''}${w}</span>`).join('')}
+      </div>
+      <div style="overflow-x:auto"><div id="grid" style="display:grid;grid-template-columns:repeat(${N},${cellPx}px);gap:2px;user-select:none;width:max-content;margin:0 auto">
+        ${grid.map((row,y)=>row.map((c,x)=>`<div data-x="${x}" data-y="${y}" style="width:${cellPx}px;height:${cellPx}px;display:grid;place-items:center;
+          border-radius:6px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-weight:700;font-size:${dificil?12:13}px;cursor:pointer;">${c}</div>`).join('')).join('')}
+      </div></div>`;
+    const cells = document.querySelectorAll('#grid > div');
+    cells.forEach(c=>{
+      c.addEventListener('pointerdown',e=>{dragging=true;path=[c];marcar();});
+      c.addEventListener('pointerenter',()=>{ if(dragging){ if(!path.includes(c)) path.push(c); marcar(); } });
+    });
+    document.addEventListener('pointerup',soltar,{once:true});
+    function marcar(){ cells.forEach(x=>x.style.background='rgba(255,255,255,.06)');
+      path.forEach(x=>x.style.background='rgba(242,181,68,.35)'); }
+    function soltar(){
+      dragging=false;
+      if(path.length>1){
+        const txt = path.map(c=>grid[+c.dataset.y][+c.dataset.x]).join('');
+        const rev = txt.split('').reverse().join('');
+        const hit = coloc.find(o=>(o.w===txt||o.w===rev) && !found.has(o.w));
+        if(hit){ found.add(hit.w); Snd.good(); confetti(18);
+          path.forEach(x=>x.style.background='rgba(63,208,138,.4)');
+          setProg(found.size,palabras.length);
+          if(found.size===palabras.length){ setTimeout(()=>finishLevel(l,palabras.length,palabras.length,
+            'Encontraste todas las palabras. ¡Buen repaso de vocabulario!'),700); return; }
+        } else Snd.tap();
+      }
+      setTimeout(paint,120);
+    }
+  }
+}
+
+/* =========================================================
+   M4 · MEMORIA CIRCULAR (relacionar término / definición)
+   ========================================================= */
+const TERMINOS = [
+ ['Reciclar','Procesar un material usado para fabricar materia prima nueva.'],
+ ['Compost','Abono que resulta de descomponer materia orgánica.'],
+ ['Reparar','Arreglar algo para que vuelva a funcionar como antes.'],
+ ['Reducir','Usar menos cantidad de material o energía por unidad.'],
+ ['Residuo','Lo que sobra o se descarta de un proceso o producto.'],
+ ['Cascada de valor','Aprovechar un material primero en su uso de mayor valor.'],
+ ['Ciclo técnico','Circuito de materiales que vuelven a la industria sin degradarse.'],
+ ['Ecodiseño','Diseñar un producto pensando en todo su ciclo de vida.'],
+ ['Simbiosis industrial','El subproducto de una empresa es insumo de otra.'],
+ ['REP','El fabricante se hace cargo del producto al final de su vida.']
+];
+function gTerminos(l){
+  const n = ({exp:5,inv:6,est:8})[S.band||'inv'];
+  const pares = shuffle(TERMINOS).slice(0,n);
+  const izq = shuffle(pares), der = shuffle(pares);
+  let sel=null, matched=0, intentos=0;
+  gameShell(l,`
+    <div class="prompt">Tocá una <b>palabra</b> y después la <b>definición</b> que le corresponde.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+      <div><div class="eyebrow" style="margin-bottom:7px">Palabras</div><div class="optgrid" id="colA">
+        ${izq.map(p=>`<div class="tile" data-a="${TERMINOS.indexOf(p)}" style="text-align:center;font-size:.9rem">${p[0]}</div>`).join('')}</div></div>
+      <div><div class="eyebrow" style="margin-bottom:7px">Definiciones</div><div class="optgrid" id="colB">
+        ${der.map(p=>`<div class="tile" data-b="${TERMINOS.indexOf(p)}" style="text-align:left;font-size:.78rem;line-height:1.35">${p[1]}</div>`).join('')}</div></div>
+    </div>
+    <div id="fb" style="margin-top:12px"></div>`);
+  setProg(0,n);
+  document.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>{
+    Snd.tap(); document.querySelectorAll('[data-a]').forEach(x=>x.classList.remove('sel'));
+    el.classList.add('sel'); sel=el; });
+  document.querySelectorAll('[data-b]').forEach(el=>el.onclick=()=>{
+    if(!sel){ toast('Elegí primero una palabra'); return; }
+    intentos++;
+    const ok=sel.dataset.a===el.dataset.b; const p=TERMINOS[+el.dataset.b];
+    hit(ok);
+    if(ok){ matched++; Snd.good(); sel.classList.remove('sel'); sel.classList.add('used'); el.classList.add('used');
+      document.getElementById('fb').innerHTML=`<div class="feedback ok"><b>✔ ${p[0]}</b>${p[1]}</div>`;
+      setProg(matched,n); sel=null;
+      if(matched===n){ setTimeout(()=>finishLevel(l,n,Math.max(n,intentos),
+        `Relacionaste las ${n} palabras con ${intentos} intentos. Buen repaso de todo lo aprendido en el camino.`),800); }
+    } else { Snd.bad(); el.classList.add('no'); const s2=sel; s2.classList.add('no');
+      setTimeout(()=>{el.classList.remove('no');s2.classList.remove('no','sel');},600);
+      document.getElementById('fb').innerHTML=`<div class="feedback no"><b>✘ No es esa definición</b>Pensá de nuevo qué significa esa palabra.</div>`;
+      sel=null;
+    }
+  });
+}
+
+/* =========================================================
+   ARRANQUE
 /* =========================================================
    ARRANQUE
    ========================================================= */
